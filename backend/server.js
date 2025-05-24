@@ -4,12 +4,6 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { ethers } = require("ethers");
 const mongoose = require("mongoose");
-const { storeMessage } = require("./services/ipfsService");
-const {
-  mintProfileNFT,
-  supportCreator,
-  getProfileOnChainData,
-} = require("./services/contractService");
 require("dotenv").config();
 
 const app = express();
@@ -60,6 +54,9 @@ const contract = new ethers.Contract(
   [
     "function getSupportCount(address) view returns (uint256)",
     "function getSupporters(address) view returns (address[])",
+    "event Supported(address indexed supporter, address indexed creator, uint256 amount)",
+    "event ProfileMinted(address indexed user, uint256 tokenId)",
+    "event EndorsementMinted(address indexed from, address indexed to, uint256 tokenId)",
   ],
   provider
 );
@@ -75,6 +72,104 @@ const limiter = rateLimit({
   max: 100,
 });
 app.use(limiter);
+
+// Helper function to verify transaction
+async function verifyTransaction(txHash, expectedType, expectedParams = {}) {
+  try {
+    // Get transaction receipt
+    const receipt = await provider.getTransactionReceipt(txHash);
+    if (!receipt || !receipt.status) {
+      return { verified: false, reason: "Transaction failed or not found" };
+    }
+
+    // Parse logs based on transaction type
+    let verified = false;
+    let eventData = null;
+
+    // Loop through logs and find matching event
+    for (const log of receipt.logs) {
+      // Skip logs from other contracts
+      if (
+        log.address.toLowerCase() !== process.env.CONTRACT_ADDRESS.toLowerCase()
+      ) {
+        continue;
+      }
+
+      try {
+        const parsedLog = contract.interface.parseLog(log);
+
+        if (!parsedLog) continue;
+
+        // Check for specific event types
+        if (expectedType === "support" && parsedLog.name === "Supported") {
+          // Verify supporter and recipient addresses
+          const supporter = parsedLog.args.supporter.toLowerCase();
+          const recipient = parsedLog.args.creator.toLowerCase();
+
+          if (
+            supporter === expectedParams.supporter.toLowerCase() &&
+            recipient === expectedParams.recipient.toLowerCase()
+          ) {
+            verified = true;
+            eventData = {
+              supporter,
+              recipient,
+              amount: parsedLog.args.amount.toString(),
+            };
+            break;
+          }
+        } else if (
+          expectedType === "profileNFT" &&
+          parsedLog.name === "ProfileMinted"
+        ) {
+          // Verify user address
+          const user = parsedLog.args.user.toLowerCase();
+
+          if (user === expectedParams.user.toLowerCase()) {
+            verified = true;
+            eventData = {
+              user,
+              tokenId: parsedLog.args.tokenId.toString(),
+            };
+            break;
+          }
+        } else if (
+          expectedType === "endorsement" &&
+          parsedLog.name === "EndorsementMinted"
+        ) {
+          // Verify from and to addresses
+          const from = parsedLog.args.from.toLowerCase();
+          const to = parsedLog.args.to.toLowerCase();
+
+          if (
+            from === expectedParams.from.toLowerCase() &&
+            to === expectedParams.to.toLowerCase()
+          ) {
+            verified = true;
+            eventData = {
+              from,
+              to,
+              tokenId: parsedLog.args.tokenId.toString(),
+            };
+            break;
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing log:", error);
+        // Continue to next log even if this one fails to parse
+      }
+    }
+
+    return {
+      verified,
+      data: eventData,
+      receipt,
+    };
+  } catch (error) {
+    console.error("Error verifying transaction:", error);
+    return { verified: false, reason: "Error verifying transaction" };
+  }
+}
 
 // 1. POST /api/profile - Create/update user profile
 app.post("/api/profile", async (req, res) => {
@@ -140,73 +235,21 @@ app.get("/api/profile/:address", async (req, res) => {
       return res.status(404).json({ error: "Profile not found" });
     }
 
-    // Get on-chain data using the new service
-    const onChainData = await getProfileOnChainData(address);
+    // Get on-chain data
+    const onChainSupportCount = await contract.getSupportCount(address);
+    const supporters = await contract.getSupporters(address);
 
     // Combine off-chain and on-chain data
     const response = {
       ...profile.toObject(),
-      supportCount: onChainData.supportCount,
-      supporters: onChainData.supporters,
+      supportCount: onChainSupportCount.toString(),
+      supporters: supporters.map((addr) => addr.toLowerCase()),
     };
 
     res.json(response);
   } catch (error) {
     console.error("Get profile error:", error);
     res.status(500).json({ error: "Failed to fetch profile" });
-  }
-});
-
-app.post("/api/profile/mint-nft", async (req, res) => {
-  try {
-    const { wallet } = req.body;
-
-    if (!ethers.isAddress(wallet)) {
-      return res.status(400).json({ error: "Invalid wallet address" });
-    }
-
-    const formattedAddress = ethers.getAddress(wallet);
-
-    // Check if profile exists
-    const profile = await UserProfile.findOne({ wallet: formattedAddress });
-    if (!profile) {
-      return res
-        .status(404)
-        .json({ error: "Profile not found. Create a profile first." });
-    }
-
-    // Check if NFT already minted
-    if (profile.profileNftTokenId) {
-      return res.status(400).json({
-        error: "Profile NFT already minted",
-        tokenId: profile.profileNftTokenId,
-      });
-    }
-
-    // Mint the NFT
-    const mintResult = await mintProfileNFT(formattedAddress);
-
-    // Update profile with token ID
-    const updatedProfile = await UserProfile.findOneAndUpdate(
-      { wallet: formattedAddress },
-      {
-        profileNftTokenId: mintResult.tokenId,
-        lastUpdated: new Date(),
-      },
-      { new: true }
-    );
-
-    res.json({
-      success: true,
-      profile: updatedProfile,
-      nft: {
-        tokenId: mintResult.tokenId,
-        txHash: mintResult.txHash,
-      },
-    });
-  } catch (error) {
-    console.error("NFT minting error:", error);
-    res.status(500).json({ error: "Failed to mint profile NFT" });
   }
 });
 
@@ -266,40 +309,71 @@ app.post("/api/farcaster/verify", async (req, res) => {
   }
 });
 
-// 5. POST /api/support/log - Log support action
+// 5. POST /api/verify/transaction - Verify a blockchain transaction
+app.post("/api/verify/transaction", async (req, res) => {
+  try {
+    const { txHash, type, params } = req.body;
+
+    if (!txHash) {
+      return res.status(400).json({ error: "Transaction hash is required" });
+    }
+
+    if (!type || !["support", "profileNFT", "endorsement"].includes(type)) {
+      return res.status(400).json({ error: "Invalid transaction type" });
+    }
+
+    const verification = await verifyTransaction(txHash, type, params);
+
+    if (!verification.verified) {
+      return res.status(400).json({
+        error: "Transaction verification failed",
+        reason: verification.reason,
+      });
+    }
+
+    res.json({
+      success: true,
+      verified: true,
+      data: verification.data,
+    });
+  } catch (error) {
+    console.error("Transaction verification error:", error);
+    res.status(500).json({ error: "Failed to verify transaction" });
+  }
+});
+
+// 6. POST /api/support/log - Log support action from frontend transaction
 app.post("/api/support/log", async (req, res) => {
   try {
-    const { supporter, recipient, amount, message } = req.body;
+    const { supporter, recipient, amount, txHash, messageIpfs } = req.body;
 
     if (!ethers.isAddress(supporter) || !ethers.isAddress(recipient)) {
       return res.status(400).json({ error: "Invalid addresses" });
     }
 
-    // Store message on IPFS if provided
-    let messageIpfs = null;
-    if (message) {
-      messageIpfs = await storeMessage({
-        from: supporter,
-        to: recipient,
-        message,
-        timestamp: new Date().toISOString(),
+    if (!txHash) {
+      return res.status(400).json({ error: "Transaction hash is required" });
+    }
+
+    // Verify the transaction happened on-chain
+    const verification = await verifyTransaction(txHash, "support", {
+      supporter,
+      recipient,
+    });
+
+    if (!verification.verified) {
+      return res.status(400).json({
+        error: "Invalid or unconfirmed transaction",
+        details: verification.reason,
       });
     }
 
-    // Execute on-chain support transaction
-    const supportResult = await supportCreator({
-      supporter,
-      recipient,
-      amount,
-      messageIpfs,
-    });
-
-    // Create support log in database
+    // Create support log
     const supportLog = new SupportLog({
       supporter: ethers.getAddress(supporter),
       recipient: ethers.getAddress(recipient),
       amount,
-      txHash: supportResult.txHash,
+      txHash,
       messageIpfs,
     });
 
@@ -315,14 +389,127 @@ app.post("/api/support/log", async (req, res) => {
       success: true,
       supportLog,
       transaction: {
-        hash: supportResult.txHash,
-        blockNumber: supportResult.blockNumber,
+        hash: txHash,
+        blockNumber: verification.receipt.blockNumber,
       },
-      messageIpfs,
     });
   } catch (error) {
     console.error("Support log error:", error);
     res.status(500).json({ error: "Failed to log support" });
+  }
+});
+
+// 7. POST /api/profile/mint-log - Log profile NFT minting from frontend
+app.post("/api/profile/mint-log", async (req, res) => {
+  try {
+    const { wallet, txHash } = req.body;
+
+    if (!ethers.isAddress(wallet)) {
+      return res.status(400).json({ error: "Invalid wallet address" });
+    }
+
+    if (!txHash) {
+      return res.status(400).json({ error: "Transaction hash is required" });
+    }
+
+    // Verify the transaction happened on-chain
+    const verification = await verifyTransaction(txHash, "profileNFT", {
+      user: wallet,
+    });
+
+    if (!verification.verified) {
+      return res.status(400).json({
+        error: "Invalid or unconfirmed transaction",
+        details: verification.reason,
+      });
+    }
+
+    const tokenId = verification.data.tokenId;
+
+    // Update profile with token ID
+    const updatedProfile = await UserProfile.findOneAndUpdate(
+      { wallet: ethers.getAddress(wallet) },
+      {
+        profileNftTokenId: tokenId,
+        lastUpdated: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!updatedProfile) {
+      // Create minimal profile if one doesn't exist
+      const newProfile = new UserProfile({
+        wallet: ethers.getAddress(wallet),
+        profileNftTokenId: tokenId,
+        lastUpdated: new Date(),
+      });
+      await newProfile.save();
+
+      return res.status(201).json({
+        success: true,
+        profile: newProfile,
+        nft: {
+          tokenId,
+          txHash,
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      profile: updatedProfile,
+      nft: {
+        tokenId,
+        txHash,
+      },
+    });
+  } catch (error) {
+    console.error("NFT minting log error:", error);
+    res.status(500).json({ error: "Failed to log profile NFT minting" });
+  }
+});
+
+// 8. POST /api/endorsement/log - Log endorsement from frontend
+app.post("/api/endorsement/log", async (req, res) => {
+  try {
+    const { from, to, txHash } = req.body;
+
+    if (!ethers.isAddress(from) || !ethers.isAddress(to)) {
+      return res.status(400).json({ error: "Invalid addresses" });
+    }
+
+    if (!txHash) {
+      return res.status(400).json({ error: "Transaction hash is required" });
+    }
+
+    // Verify the transaction happened on-chain
+    const verification = await verifyTransaction(txHash, "endorsement", {
+      from,
+      to,
+    });
+
+    if (!verification.verified) {
+      return res.status(400).json({
+        error: "Invalid or unconfirmed transaction",
+        details: verification.reason,
+      });
+    }
+
+    // In a more complete implementation, you might store endorsement data
+    // For now, we just return success and the verified data
+
+    res.json({
+      success: true,
+      endorsement: {
+        from: ethers.getAddress(from),
+        to: ethers.getAddress(to),
+        tokenId: verification.data.tokenId,
+        txHash,
+      },
+    });
+  } catch (error) {
+    console.error("Endorsement log error:", error);
+    res.status(500).json({ error: "Failed to log endorsement" });
   }
 });
 
