@@ -4,6 +4,12 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { ethers } = require("ethers");
 const mongoose = require("mongoose");
+const { storeMessage } = require("./services/ipfsService");
+const {
+  mintProfileNFT,
+  supportCreator,
+  getProfileOnChainData,
+} = require("./services/contractService");
 require("dotenv").config();
 
 const app = express();
@@ -134,19 +140,73 @@ app.get("/api/profile/:address", async (req, res) => {
       return res.status(404).json({ error: "Profile not found" });
     }
 
-    // Get on-chain data
-    const onChainSupportCount = await contract.getSupportCount(address);
+    // Get on-chain data using the new service
+    const onChainData = await getProfileOnChainData(address);
 
     // Combine off-chain and on-chain data
     const response = {
       ...profile.toObject(),
-      supportCount: onChainSupportCount.toString(),
+      supportCount: onChainData.supportCount,
+      supporters: onChainData.supporters,
     };
 
     res.json(response);
   } catch (error) {
     console.error("Get profile error:", error);
     res.status(500).json({ error: "Failed to fetch profile" });
+  }
+});
+
+app.post("/api/profile/mint-nft", async (req, res) => {
+  try {
+    const { wallet } = req.body;
+
+    if (!ethers.isAddress(wallet)) {
+      return res.status(400).json({ error: "Invalid wallet address" });
+    }
+
+    const formattedAddress = ethers.getAddress(wallet);
+
+    // Check if profile exists
+    const profile = await UserProfile.findOne({ wallet: formattedAddress });
+    if (!profile) {
+      return res
+        .status(404)
+        .json({ error: "Profile not found. Create a profile first." });
+    }
+
+    // Check if NFT already minted
+    if (profile.profileNftTokenId) {
+      return res.status(400).json({
+        error: "Profile NFT already minted",
+        tokenId: profile.profileNftTokenId,
+      });
+    }
+
+    // Mint the NFT
+    const mintResult = await mintProfileNFT(formattedAddress);
+
+    // Update profile with token ID
+    const updatedProfile = await UserProfile.findOneAndUpdate(
+      { wallet: formattedAddress },
+      {
+        profileNftTokenId: mintResult.tokenId,
+        lastUpdated: new Date(),
+      },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      profile: updatedProfile,
+      nft: {
+        tokenId: mintResult.tokenId,
+        txHash: mintResult.txHash,
+      },
+    });
+  } catch (error) {
+    console.error("NFT minting error:", error);
+    res.status(500).json({ error: "Failed to mint profile NFT" });
   }
 });
 
@@ -209,18 +269,37 @@ app.post("/api/farcaster/verify", async (req, res) => {
 // 5. POST /api/support/log - Log support action
 app.post("/api/support/log", async (req, res) => {
   try {
-    const { supporter, recipient, amount, txHash, messageIpfs } = req.body;
+    const { supporter, recipient, amount, message } = req.body;
 
     if (!ethers.isAddress(supporter) || !ethers.isAddress(recipient)) {
       return res.status(400).json({ error: "Invalid addresses" });
     }
 
-    // Create support log
+    // Store message on IPFS if provided
+    let messageIpfs = null;
+    if (message) {
+      messageIpfs = await storeMessage({
+        from: supporter,
+        to: recipient,
+        message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Execute on-chain support transaction
+    const supportResult = await supportCreator({
+      supporter,
+      recipient,
+      amount,
+      messageIpfs,
+    });
+
+    // Create support log in database
     const supportLog = new SupportLog({
       supporter: ethers.getAddress(supporter),
       recipient: ethers.getAddress(recipient),
       amount,
-      txHash,
+      txHash: supportResult.txHash,
       messageIpfs,
     });
 
@@ -232,7 +311,15 @@ app.post("/api/support/log", async (req, res) => {
       { $inc: { supportCount: 1 } }
     );
 
-    res.status(201).json(supportLog);
+    res.status(201).json({
+      success: true,
+      supportLog,
+      transaction: {
+        hash: supportResult.txHash,
+        blockNumber: supportResult.blockNumber,
+      },
+      messageIpfs,
+    });
   } catch (error) {
     console.error("Support log error:", error);
     res.status(500).json({ error: "Failed to log support" });

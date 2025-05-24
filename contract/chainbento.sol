@@ -3,404 +3,139 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract ChainBentoProfileRegistry is
-    ERC721,
-    ERC721URIStorage,
-    Ownable,
-    ReentrancyGuard
-{
+contract ChainBentoEnhanced is ERC721URIStorage {
     using Counters for Counters.Counter;
+    using Strings for uint256;
 
-    Counters.Counter private _profileIds;
-    Counters.Counter private _endorsementIds;
+    Counters.Counter private _tokenIds;
 
-    // Profile structure
-    struct Profile {
-        address owner;
-        string name;
-        string bio;
-        string imageURI;
-        string github;
-        string twitter;
-        string farcaster;
-        string blog;
-        string[] projects;
-        uint256 totalSupport;
-        uint256 supportCount;
-        uint256 createdAt;
-        bool exists;
-    }
+    // Core mappings from original contract
+    mapping(address => uint256) public profileNFTs;
+    mapping(address => uint256) public supportCount;
+    mapping(address => address[]) public supporters;
 
-    // Support/Tip structure
-    struct Support {
-        address supporter;
-        address profileOwner;
-        uint256 amount;
-        address tokenAddress; // address(0) for ETH
-        string message;
-        uint256 timestamp;
-    }
-
-    // Endorsement NFT structure
-    struct Endorsement {
-        uint256 profileId;
-        address endorser;
-        string messageURI;
-        uint256 timestamp;
-    }
-
-    // Mappings
-    mapping(address => uint256) public addressToProfileId;
-    mapping(uint256 => Profile) public profiles;
-    mapping(uint256 => Endorsement) public endorsements;
-    mapping(address => Support[]) public userSupports;
-    mapping(address => uint256[]) public profileEndorsements;
+    // New mappings for name support
+    mapping(string => bool) public usedNames;
+    mapping(uint256 => string) public tokenIdToName;
+    mapping(string => address) public nameToOwner;
 
     // Events
-    event ProfileCreated(
-        uint256 indexed profileId,
-        address indexed owner,
-        string name
-    );
-    event ProfileUpdated(uint256 indexed profileId, address indexed owner);
-    event ProfileSupported(
+    event ProfileMinted(address indexed user, uint256 tokenId, string name);
+    event Supported(
         address indexed supporter,
-        address indexed profileOwner,
-        uint256 amount,
-        address tokenAddress
+        address indexed creator,
+        uint256 amount
     );
     event EndorsementMinted(
-        uint256 indexed endorsementId,
-        uint256 indexed profileId,
-        address indexed endorser
+        address indexed from,
+        address indexed to,
+        uint256 tokenId
     );
 
-    // Platform fee (in basis points, 100 = 1%)
-    uint256 public platformFee = 250; // 2.5%
-    address public feeRecipient;
+    constructor() ERC721("ChainBentoProfile", "CBP") {}
 
-    constructor(address _feeRecipient) ERC721("ChainBento Profile", "CBP") {
-        feeRecipient = _feeRecipient;
+    // Original function - maintained for backward compatibility
+    function mintProfileNFT() external returns (uint256) {
+        require(profileNFTs[msg.sender] == 0, "Already has profile NFT");
+
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
+
+        _safeMint(msg.sender, newTokenId);
+        profileNFTs[msg.sender] = newTokenId;
+
+        emit ProfileMinted(msg.sender, newTokenId, "");
+        return newTokenId;
     }
 
-    // Create a new profile and mint profile NFT
-    function createProfile(
-        string memory _name,
-        string memory _bio,
-        string memory _imageURI,
-        string memory _github,
-        string memory _twitter,
-        string memory _farcaster,
-        string memory _blog,
-        string[] memory _projects
-    ) external {
-        require(addressToProfileId[msg.sender] == 0, "Profile already exists");
-        require(bytes(_name).length > 0, "Name cannot be empty");
-
-        _profileIds.increment();
-        uint256 newProfileId = _profileIds.current();
-
-        Profile storage newProfile = profiles[newProfileId];
-        newProfile.owner = msg.sender;
-        newProfile.name = _name;
-        newProfile.bio = _bio;
-        newProfile.imageURI = _imageURI;
-        newProfile.github = _github;
-        newProfile.twitter = _twitter;
-        newProfile.farcaster = _farcaster;
-        newProfile.blog = _blog;
-        newProfile.projects = _projects;
-        newProfile.totalSupport = 0;
-        newProfile.supportCount = 0;
-        newProfile.createdAt = block.timestamp;
-        newProfile.exists = true;
-
-        addressToProfileId[msg.sender] = newProfileId;
-
-        // Mint profile NFT
-        _safeMint(msg.sender, newProfileId);
-
-        emit ProfileCreated(newProfileId, msg.sender, _name);
-    }
-
-    // Update existing profile
-    function updateProfile(
-        string memory _name,
-        string memory _bio,
-        string memory _imageURI,
-        string memory _github,
-        string memory _twitter,
-        string memory _farcaster,
-        string memory _blog,
-        string[] memory _projects
-    ) external {
-        uint256 profileId = addressToProfileId[msg.sender];
-        require(profileId > 0, "Profile does not exist");
-        require(profiles[profileId].owner == msg.sender, "Not profile owner");
-
-        Profile storage profile = profiles[profileId];
-        profile.name = _name;
-        profile.bio = _bio;
-        profile.imageURI = _imageURI;
-        profile.github = _github;
-        profile.twitter = _twitter;
-        profile.farcaster = _farcaster;
-        profile.blog = _blog;
-        profile.projects = _projects;
-
-        emit ProfileUpdated(profileId, msg.sender);
-    }
-
-    // Support a profile with ETH
-    function supportProfile(
-        address _profileOwner,
-        string memory _message
-    ) external payable nonReentrant {
-        require(msg.value > 0, "Support amount must be greater than 0");
-        uint256 profileId = addressToProfileId[_profileOwner];
-        require(profileId > 0, "Profile does not exist");
-        require(_profileOwner != msg.sender, "Cannot support your own profile");
-
-        uint256 fee = (msg.value * platformFee) / 10000;
-        uint256 supportAmount = msg.value - fee;
-
-        // Update profile support stats
-        profiles[profileId].totalSupport += supportAmount;
-        profiles[profileId].supportCount += 1;
-
-        // Record support
-        Support memory newSupport = Support({
-            supporter: msg.sender,
-            profileOwner: _profileOwner,
-            amount: supportAmount,
-            tokenAddress: address(0), // ETH
-            message: _message,
-            timestamp: block.timestamp
-        });
-
-        userSupports[_profileOwner].push(newSupport);
-
-        // Transfer funds
-        if (fee > 0) {
-            payable(feeRecipient).transfer(fee);
-        }
-        payable(_profileOwner).transfer(supportAmount);
-
-        emit ProfileSupported(
-            msg.sender,
-            _profileOwner,
-            supportAmount,
-            address(0)
-        );
-    }
-
-    // Support a profile with ERC20 tokens
-    function supportProfileWithToken(
-        address _profileOwner,
-        address _tokenAddress,
-        uint256 _amount,
-        string memory _message
-    ) external nonReentrant {
-        require(_amount > 0, "Support amount must be greater than 0");
-        uint256 profileId = addressToProfileId[_profileOwner];
-        require(profileId > 0, "Profile does not exist");
-        require(_profileOwner != msg.sender, "Cannot support your own profile");
-
-        IERC20 token = IERC20(_tokenAddress);
-        require(
-            token.transferFrom(msg.sender, address(this), _amount),
-            "Token transfer failed"
-        );
-
-        uint256 fee = (_amount * platformFee) / 10000;
-        uint256 supportAmount = _amount - fee;
-
-        // Update profile support stats (convert to ETH equivalent for ranking)
-        profiles[profileId].totalSupport += supportAmount; // Note: In production, use oracle for conversion
-        profiles[profileId].supportCount += 1;
-
-        // Record support
-        Support memory newSupport = Support({
-            supporter: msg.sender,
-            profileOwner: _profileOwner,
-            amount: supportAmount,
-            tokenAddress: _tokenAddress,
-            message: _message,
-            timestamp: block.timestamp
-        });
-
-        userSupports[_profileOwner].push(newSupport);
-
-        // Transfer tokens
-        if (fee > 0) {
-            require(token.transfer(feeRecipient, fee), "Fee transfer failed");
-        }
-        require(
-            token.transfer(_profileOwner, supportAmount),
-            "Support transfer failed"
-        );
-
-        emit ProfileSupported(
-            msg.sender,
-            _profileOwner,
-            supportAmount,
-            _tokenAddress
-        );
-    }
-
-    // Mint endorsement NFT
-    function mintEndorsementNFT(
-        address _profileOwner,
-        string memory _messageURI
+    // New function with name support
+    function mintProfileNFTWithName(
+        string memory name
     ) external returns (uint256) {
-        uint256 profileId = addressToProfileId[_profileOwner];
-        require(profileId > 0, "Profile does not exist");
-        require(_profileOwner != msg.sender, "Cannot endorse your own profile");
+        require(profileNFTs[msg.sender] == 0, "Already has profile NFT");
+        require(bytes(name).length > 0, "Name cannot be empty");
+        require(!usedNames[name], "Name already taken");
 
-        _endorsementIds.increment();
-        uint256 newEndorsementId = _endorsementIds.current();
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
 
-        Endorsement storage newEndorsement = endorsements[newEndorsementId];
-        newEndorsement.profileId = profileId;
-        newEndorsement.endorser = msg.sender;
-        newEndorsement.messageURI = _messageURI;
-        newEndorsement.timestamp = block.timestamp;
+        _safeMint(msg.sender, newTokenId);
+        profileNFTs[msg.sender] = newTokenId;
 
-        profileEndorsements[_profileOwner].push(newEndorsementId);
+        // Store name associations
+        usedNames[name] = true;
+        tokenIdToName[newTokenId] = name;
+        nameToOwner[name] = msg.sender;
 
-        // Mint endorsement NFT to the endorser
-        _safeMint(msg.sender, newEndorsementId);
-        _setTokenURI(newEndorsementId, _messageURI);
-
-        emit EndorsementMinted(newEndorsementId, profileId, msg.sender);
-
-        return newEndorsementId;
+        emit ProfileMinted(msg.sender, newTokenId, name);
+        return newTokenId;
     }
 
-    // View functions
-    function getProfile(address _owner) external view returns (Profile memory) {
-        uint256 profileId = addressToProfileId[_owner];
-        require(profileId > 0, "Profile does not exist");
-        return profiles[profileId];
+    // Modified support function to allow using names
+    function support(address creator) external payable {
+        require(msg.value > 0, "Must send ETH to support");
+        require(profileNFTs[creator] != 0, "Creator has no profile");
+        require(creator != msg.sender, "Cannot support yourself");
+
+        supportCount[creator] += 1;
+        supporters[creator].push(msg.sender);
+
+        payable(creator).transfer(msg.value);
+        emit Supported(msg.sender, creator, msg.value);
     }
 
-    function getProfileById(
-        uint256 _profileId
-    ) external view returns (Profile memory) {
-        require(
-            _profileId > 0 && _profileId <= _profileIds.current(),
-            "Invalid profile ID"
-        );
-        return profiles[_profileId];
+    // Additional function to support by name
+    function supportByName(string memory creatorName) external payable {
+        address creator = nameToOwner[creatorName];
+        require(creator != address(0), "Creator name not found");
+        require(msg.value > 0, "Must send ETH to support");
+        require(creator != msg.sender, "Cannot support yourself");
+
+        supportCount[creator] += 1;
+        supporters[creator].push(msg.sender);
+
+        payable(creator).transfer(msg.value);
+        emit Supported(msg.sender, creator, msg.value);
+    }
+
+    function mintEndorsement(address to) external {
+        require(profileNFTs[to] != 0, "Recipient has no profile");
+        require(to != msg.sender, "Cannot endorse yourself");
+
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
+
+        _safeMint(msg.sender, newTokenId);
+        emit EndorsementMinted(msg.sender, to, newTokenId);
+    }
+
+    // Utility functions
+    function getSupporters(
+        address profileOwner
+    ) external view returns (address[] memory) {
+        return supporters[profileOwner];
     }
 
     function getSupportCount(
-        address _profileOwner
+        address profileOwner
     ) external view returns (uint256) {
-        uint256 profileId = addressToProfileId[_profileOwner];
-        if (profileId == 0) return 0;
-        return profiles[profileId].supportCount;
+        return supportCount[profileOwner];
     }
 
-    function getTotalSupport(
-        address _profileOwner
-    ) external view returns (uint256) {
-        uint256 profileId = addressToProfileId[_profileOwner];
-        if (profileId == 0) return 0;
-        return profiles[profileId].totalSupport;
+    function getProfileOwnerByName(
+        string memory name
+    ) external view returns (address) {
+        return nameToOwner[name];
     }
 
-    function getProfileSupports(
-        address _profileOwner
-    ) external view returns (Support[] memory) {
-        return userSupports[_profileOwner];
-    }
-
-    function getProfileEndorsements(
-        address _profileOwner
-    ) external view returns (uint256[] memory) {
-        return profileEndorsements[_profileOwner];
-    }
-
-    function getEndorsement(
-        uint256 _endorsementId
-    ) external view returns (Endorsement memory) {
-        return endorsements[_endorsementId];
-    }
-
-    function getTotalProfiles() external view returns (uint256) {
-        return _profileIds.current();
-    }
-
-    function getTotalEndorsements() external view returns (uint256) {
-        return _endorsementIds.current();
-    }
-
-    // Get top profiles by support (for leaderboard)
-    function getTopProfilesBySupport(
-        uint256 _limit
-    ) external view returns (address[] memory, uint256[] memory) {
-        uint256 totalProfiles = _profileIds.current();
-        require(_limit > 0 && _limit <= totalProfiles, "Invalid limit");
-
-        address[] memory topAddresses = new address[](_limit);
-        uint256[] memory topSupport = new uint256[](_limit);
-
-        // Simple sorting (in production, consider using a more efficient approach)
-        for (uint256 i = 1; i <= totalProfiles; i++) {
-            Profile memory profile = profiles[i];
-
-            // Find position to insert
-            for (uint256 j = 0; j < _limit; j++) {
-                if (profile.totalSupport > topSupport[j]) {
-                    // Shift elements
-                    for (uint256 k = _limit - 1; k > j; k--) {
-                        topAddresses[k] = topAddresses[k - 1];
-                        topSupport[k] = topSupport[k - 1];
-                    }
-                    // Insert new element
-                    topAddresses[j] = profile.owner;
-                    topSupport[j] = profile.totalSupport;
-                    break;
-                }
-            }
-        }
-
-        return (topAddresses, topSupport);
-    }
-
-    // Admin functions
-    function setPlatformFee(uint256 _newFee) external onlyOwner {
-        require(_newFee <= 1000, "Fee cannot exceed 10%"); // Max 10%
-        platformFee = _newFee;
-    }
-
-    function setFeeRecipient(address _newRecipient) external onlyOwner {
-        require(_newRecipient != address(0), "Invalid recipient");
-        feeRecipient = _newRecipient;
-    }
-
-    // Override functions
-    function _burn(
-        uint256 tokenId
-    ) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
-    }
-
-    function tokenURI(
-        uint256 tokenId
-    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
-        return super.tokenURI(tokenId);
-    }
-
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override(ERC721, ERC721URIStorage) returns (bool) {
-        return super.supportsInterface(interfaceId);
+    function getProfileNameByAddress(
+        address owner
+    ) external view returns (string memory) {
+        uint256 tokenId = profileNFTs[owner];
+        require(tokenId != 0, "No profile NFT found");
+        return tokenIdToName[tokenId];
     }
 }
