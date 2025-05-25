@@ -1,7 +1,7 @@
-// import { Input } from "@/components/ui/input"
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-// import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge"
 import {
   Github,
   Wallet,
@@ -26,8 +25,44 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { useLogin, useLogout, usePrivy } from "@privy-io/react-auth";
+import { useAccount, useBalance } from "wagmi";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
+  const { ready, authenticated, user: privyUser } = usePrivy();
+  const { login } = useLogin();
+  const { logout } = useLogout();
+  const { address } = useAccount();
+  const { data: balance } = useBalance({
+    address: address,
+  });
+  const router = useRouter();
+
+  const handleWalletAction = () => {
+    if (!ready) return; // Wait until Privy is ready
+
+    if (authenticated) {
+      logout();
+    } else {
+      login();
+    }
+  };
+
+  const handleGetStarted = () => {
+    if (!ready) return; // Wait until Privy is ready
+
+    if (authenticated) {
+      // User is authenticated, navigate to create page
+      router.push("/create");
+    } else {
+      // User not authenticated, show wallet connection prompt
+      alert("Please connect your wallet first to get started.");
+      // Optional: Trigger wallet connection
+      login();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -66,15 +101,27 @@ export default function LandingPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Button
+            {/* <Button
               variant="outline"
               className="hidden sm:flex border-gray-700 hover:bg-gray-800 hover:text-teal-400"
             >
               Sign In
+            </Button> */}
+            <Button
+              onClick={handleWalletAction}
+              className="bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-600 hover:to-indigo-700 text-white"
+            >
+              {!ready
+                ? "Loading..."
+                : authenticated
+                ? "Disconnect Wallet"
+                : "Connect Wallet"}
             </Button>
-            <Button className="bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-600 hover:to-indigo-700 text-white">
-              Connect Wallet
-            </Button>
+            {authenticated && balance && (
+              <span className="text-xs px-2 py-1 bg-green-800 rounded-md">
+                {parseFloat(balance.formatted).toFixed(4)} {balance.symbol}
+              </span>
+            )}
           </div>
         </div>
       </header>
@@ -102,10 +149,11 @@ export default function LandingPage() {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Button
+                    onClick={handleGetStarted}
                     size="lg"
                     className="bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-600 hover:to-indigo-700 text-white"
                   >
-                    Connect Wallet
+                    Get Started
                   </Button>
                   <Button
                     size="lg"
