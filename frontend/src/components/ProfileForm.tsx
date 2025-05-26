@@ -3,11 +3,10 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import Image from "next/image";
 
-interface Project {
-  name: string;
+interface Work {
+  title: string;
   description: string;
-  githubUrl: string;
-  demoUrl: string;
+  url: string;
 }
 
 interface ProfileFormData {
@@ -20,7 +19,7 @@ interface ProfileFormData {
   blog: string;
   profilePicture: File | null;
   profilePicturePreview: string;
-  projects: Project[];
+  works: Work[]; // Changed from projects to works
   contributionWallet: string;
 }
 
@@ -45,9 +44,7 @@ export default function ProfileForm({
     blog: initialData?.blog || "",
     profilePicture: null,
     profilePicturePreview: initialData?.profilePicturePreview || "",
-    projects: initialData?.projects || [
-      { name: "", description: "", githubUrl: "", demoUrl: "" },
-    ],
+    works: initialData?.works || [{ title: "", description: "", url: "" }], // Initialize with a single empty work
     contributionWallet: initialData?.contributionWallet || "",
   });
 
@@ -117,40 +114,37 @@ export default function ProfileForm({
   };
 
   // Handle project changes
-  const handleProjectChange = (
+  const handleWorkChange = (
     index: number,
-    field: keyof Project,
+    field: keyof Work,
     value: string
   ) => {
     setFormData((prev) => {
-      const updatedProjects = [...prev.projects];
-      updatedProjects[index] = {
-        ...updatedProjects[index],
+      const updatedWorks = [...prev.works];
+      updatedWorks[index] = {
+        ...updatedWorks[index],
         [field]: value,
       };
-      return { ...prev, projects: updatedProjects };
+      return { ...prev, works: updatedWorks };
     });
   };
 
-  // Add new project
-  const addProject = () => {
-    if (formData.projects.length >= 3) return; // Maximum 3 projects allowed
+  // Add new work
+  const addWork = () => {
+    if (formData.works.length >= 5) return; // Maximum 5 works allowed
 
     setFormData((prev) => ({
       ...prev,
-      projects: [
-        ...prev.projects,
-        { name: "", description: "", githubUrl: "", demoUrl: "" },
-      ],
+      works: [...prev.works, { title: "", description: "", url: "" }],
     }));
   };
 
-  // Remove project
-  const removeProject = (index: number) => {
+  // Remove work
+  const removeWork = (index: number) => {
     setFormData((prev) => {
-      const updatedProjects = [...prev.projects];
-      updatedProjects.splice(index, 1);
-      return { ...prev, projects: updatedProjects };
+      const updatedWorks = [...prev.works];
+      updatedWorks.splice(index, 1);
+      return { ...prev, works: updatedWorks };
     });
   };
 
@@ -202,28 +196,25 @@ export default function ProfileForm({
     }
 
     // Project validations
-    const projectErrors: Record<string, string> = {};
-    formData.projects.forEach((project, index) => {
-      if (project.name.trim() && !project.githubUrl.trim()) {
-        projectErrors[`project_${index}_githubUrl`] =
-          "GitHub URL is required for each project";
+    const workErrors: Record<string, string> = {};
+    formData.works.forEach((work, index) => {
+      if (work.title.trim() && !work.url.trim()) {
+        workErrors[`work_${index}_url`] = "URL is required for each work";
       }
 
-      if (project.githubUrl && !urlRegex.test(project.githubUrl)) {
-        projectErrors[`project_${index}_githubUrl`] =
-          "Please enter a valid GitHub URL";
-      }
-
-      if (project.demoUrl && !urlRegex.test(project.demoUrl)) {
-        projectErrors[`project_${index}_demoUrl`] =
-          "Please enter a valid demo URL";
+      if (work.url) {
+        const urlRegex =
+          /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+        if (!urlRegex.test(work.url)) {
+          workErrors[`work_${index}_url`] = "Please enter a valid URL";
+        }
       }
     });
 
-    setErrors({ ...newErrors, ...projectErrors });
+    setErrors({ ...newErrors, ...workErrors });
     return (
       Object.keys(newErrors).length === 0 &&
-      Object.keys(projectErrors).length === 0
+      Object.keys(workErrors).length === 0
     );
   };
 
@@ -549,35 +540,36 @@ export default function ProfileForm({
       {/* Projects */}
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Top Projects</h2>
+          <h2 className="text-xl font-semibold">Your Works</h2>
 
-          {formData.projects.length < 3 && (
+          {formData.works.length < 5 && (
             <button
               type="button"
-              onClick={addProject}
+              onClick={addWork}
               className="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition"
             >
-              + Add Project
+              + Add Work
             </button>
           )}
         </div>
 
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Showcase up to 3 of your best projects.
+          Add your blog posts, projects, articles, or any other work you want to
+          showcase.
         </p>
 
-        {formData.projects.map((project, index) => (
+        {formData.works.map((work, index) => (
           <div
             key={index}
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4"
           >
             <div className="flex justify-between items-center">
-              <h3 className="font-medium">Project {index + 1}</h3>
+              <h3 className="font-medium">Work {index + 1}</h3>
 
-              {formData.projects.length > 1 && (
+              {formData.works.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => removeProject(index)}
+                  onClick={() => removeWork(index)}
                   className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                 >
                   Remove
@@ -585,104 +577,71 @@ export default function ProfileForm({
               )}
             </div>
 
-            {/* Project Name */}
+            {/* Work Title */}
             <div>
               <label
-                htmlFor={`project_${index}_name`}
+                htmlFor={`work_${index}_title`}
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Project Name
+                Title
               </label>
               <input
                 type="text"
-                id={`project_${index}_name`}
-                value={project.name}
+                id={`work_${index}_title`}
+                value={work.title}
                 onChange={(e) =>
-                  handleProjectChange(index, "name", e.target.value)
+                  handleWorkChange(index, "title", e.target.value)
                 }
-                placeholder="Project name"
+                placeholder="Title of your work"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            {/* Project Description */}
+            {/* Work Description */}
             <div>
               <label
-                htmlFor={`project_${index}_description`}
+                htmlFor={`work_${index}_description`}
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Description
               </label>
               <textarea
-                id={`project_${index}_description`}
-                value={project.description}
+                id={`work_${index}_description`}
+                value={work.description}
                 onChange={(e) =>
-                  handleProjectChange(index, "description", e.target.value)
+                  handleWorkChange(index, "description", e.target.value)
                 }
                 rows={2}
-                placeholder="Brief description of your project"
+                placeholder="Brief description of your work"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* GitHub URL */}
-              <div>
-                <label
-                  htmlFor={`project_${index}_githubUrl`}
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  GitHub URL
-                </label>
-                <input
-                  type="url"
-                  id={`project_${index}_githubUrl`}
-                  value={project.githubUrl}
-                  onChange={(e) =>
-                    handleProjectChange(index, "githubUrl", e.target.value)
-                  }
-                  placeholder="https://github.com/username/project"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors[`project_${index}_githubUrl`]
-                      ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                      : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                  }`}
-                />
-                {errors[`project_${index}_githubUrl`] && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors[`project_${index}_githubUrl`]}
-                  </p>
-                )}
-              </div>
-
-              {/* Demo URL */}
-              <div>
-                <label
-                  htmlFor={`project_${index}_demoUrl`}
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  Demo URL
-                </label>
-                <input
-                  type="url"
-                  id={`project_${index}_demoUrl`}
-                  value={project.demoUrl}
-                  onChange={(e) =>
-                    handleProjectChange(index, "demoUrl", e.target.value)
-                  }
-                  placeholder="https://project-demo.com"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors[`project_${index}_demoUrl`]
-                      ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                      : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                  }`}
-                />
-                {errors[`project_${index}_demoUrl`] && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors[`project_${index}_demoUrl`]}
-                  </p>
-                )}
-              </div>
+            {/* URL */}
+            <div>
+              <label
+                htmlFor={`work_${index}_url`}
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                URL
+              </label>
+              <input
+                type="url"
+                id={`work_${index}_url`}
+                value={work.url}
+                onChange={(e) => handleWorkChange(index, "url", e.target.value)}
+                placeholder="https://example.com/your-work"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  errors[`work_${index}_url`]
+                    ? "border-red-300 focus:ring-red-500 dark:border-red-600"
+                    : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                }`}
+              />
+              {errors[`work_${index}_url`] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors[`work_${index}_url`]}
+                </p>
+              )}
             </div>
           </div>
         ))}

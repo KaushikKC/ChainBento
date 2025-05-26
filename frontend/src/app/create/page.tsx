@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import ProfileForm from "@/components/ProfileForm";
+import WalletConnection from "@/components/WalletConnection";
 
 export default function CreateProfilePage() {
   const router = useRouter();
@@ -37,30 +39,44 @@ export default function CreateProfilePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
-          <h1 className="text-3xl font-bold mb-6 text-center">
-            Create Your Developer Profile
-          </h1>
-
-          <p className="text-gray-600 dark:text-gray-400 mb-8 text-center">
+    <div className="min-h-screen bg-black text-white">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-black/50 backdrop-blur-md fixed top-0 w-full z-50">
+        <div className="flex items-center justify-between h-16 px-4 md:px-6">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-md bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center">
+              <span className="font-bold text-white">CB</span>
+            </div>
+            <span className="font-bold text-xl">ChainBento</span>
+          </Link>
+          
+          {/* Using our reusable WalletConnection component */}
+          <WalletConnection />
+        </div>
+      </header>
+      
+      <main className="pt-24 pb-20 px-4 md:px-6 max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Create Your Developer Profile</h1>
+          <p className="text-gray-400">
             Mint a profile NFT to showcase your work and receive support from
             the community.
           </p>
+        </div>
+        
+        {error && (
+          <div
+            className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-6"
+            role="alert"
+          >
+            <p>{error}</p>
+          </div>
+        )}
 
-          {error && (
-            <div
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6"
-              role="alert"
-            >
-              <p>{error}</p>
-            </div>
-          )}
-
+        <div className="bg-gray-900/50 rounded-lg shadow-md p-8 border border-gray-800">
           <ProfileForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
         </div>
-      </div>
+      </main>
     </div>
   );
 }

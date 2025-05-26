@@ -25,29 +25,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { useLogin, useLogout, usePrivy } from "@privy-io/react-auth";
-import { useAccount, useBalance } from "wagmi";
+import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import WalletConnection from "@/components/WalletConnection";
 
 export default function LandingPage() {
-  const { ready, authenticated, user: privyUser } = usePrivy();
+  const { ready, authenticated } = usePrivy();
   const { login } = useLogin();
-  const { logout } = useLogout();
-  const { address } = useAccount();
-  const { data: balance } = useBalance({
-    address: address,
-  });
   const router = useRouter();
-
-  const handleWalletAction = () => {
-    if (!ready) return; // Wait until Privy is ready
-
-    if (authenticated) {
-      logout();
-    } else {
-      login();
-    }
-  };
 
   const handleGetStarted = () => {
     if (!ready) return; // Wait until Privy is ready
@@ -100,29 +85,8 @@ export default function LandingPage() {
               How It Works
             </Link>
           </nav>
-          <div className="flex items-center gap-4">
-            {/* <Button
-              variant="outline"
-              className="hidden sm:flex border-gray-700 hover:bg-gray-800 hover:text-teal-400"
-            >
-              Sign In
-            </Button> */}
-            <Button
-              onClick={handleWalletAction}
-              className="bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-600 hover:to-indigo-700 text-white"
-            >
-              {!ready
-                ? "Loading..."
-                : authenticated
-                ? "Disconnect Wallet"
-                : "Connect Wallet"}
-            </Button>
-            {authenticated && balance && (
-              <span className="text-xs px-2 py-1 bg-green-800 rounded-md">
-                {parseFloat(balance.formatted).toFixed(4)} {balance.symbol}
-              </span>
-            )}
-          </div>
+          {/* Using our new reusable WalletConnection component */}
+          <WalletConnection />
         </div>
       </header>
 
