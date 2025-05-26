@@ -19,20 +19,29 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 db.once("open", () => console.log("Connected to MongoDB"));
 
 // MongoDB Schemas
+
+// Work Schema (for nested documents)
+const workSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  url: String,
+});
+
 const userProfileSchema = new mongoose.Schema({
   wallet: { type: String, required: true, unique: true },
   name: String,
   bio: String,
   avatar: String,
-  farcaster: {
-    username: String,
-    verified: Boolean,
-  },
+  farcaster: String,
   github: String,
   twitter: String,
+  lens: String, // Added lens field
   blog: String,
+  profilePictureUrl: String, // Added for profile picture URL
+  works: [workSchema], // Changed from projects to works array with proper schema
   profileNftTokenId: Number,
   supportCount: { type: Number, default: 0 },
+  contributionWallet: String, // Added contribution wallet field
   lastUpdated: { type: Date, default: Date.now },
 });
 const UserProfile = mongoose.model("UserProfile", userProfileSchema);
@@ -174,8 +183,19 @@ async function verifyTransaction(txHash, expectedType, expectedParams = {}) {
 // 1. POST /api/profile - Create/update user profile
 app.post("/api/profile", async (req, res) => {
   try {
-    const { wallet, name, bio, avatar, farcaster, github, twitter, blog } =
-      req.body;
+    const {
+      wallet,
+      name,
+      bio,
+      profilePictureUrl, // Changed from avatar to profilePictureUrl to match frontend
+      farcaster,
+      github,
+      twitter,
+      lens, // Added lens field
+      blog,
+      works, // Changed from projects to works
+      contributionWallet, // Added contribution wallet
+    } = req.body;
 
     if (!ethers.isAddress(wallet)) {
       return res.status(400).json({ error: "Invalid wallet address" });
@@ -185,11 +205,14 @@ app.post("/api/profile", async (req, res) => {
       wallet: ethers.getAddress(wallet),
       name,
       bio,
-      avatar,
+      profilePictureUrl, // Changed from avatar to profilePictureUrl
       farcaster,
       github,
       twitter,
+      lens,
       blog,
+      works, // Added works array
+      contributionWallet,
       lastUpdated: new Date(),
     };
 
