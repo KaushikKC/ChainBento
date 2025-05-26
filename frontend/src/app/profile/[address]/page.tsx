@@ -7,14 +7,39 @@ import { useParams } from "next/navigation";
 import ProfileCard from "@/components/ProfileCard";
 import SupportModal from "@/components/SupportModal";
 import WalletConnection from "@/components/WalletConnection";
+import { useAccount } from "wagmi";
+import { usePrivy } from "@privy-io/react-auth";
 
-interface Project {
+// API base URL from environment variable or default to localhost
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// This would come from your environment variables in a real app
+const CONTRACT_ADDRESS =
+  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x123456789...";
+
+// Define the profile data interface to match the backend response
+interface ProfileData {
+  wallet: string;
   name: string;
-  description: string;
-  githubUrl: string;
-  demoUrl: string;
+  bio: string;
+  profilePictureUrl: string;
+  farcaster?: string;
+  github?: string;
+  twitter?: string;
+  lens?: string;
+  blog?: string;
+  works?: {
+    title: string;
+    description: string;
+    url: string;
+  }[];
+  supportCount: string;
+  supporters: string[];
+  contributionWallet?: string;
+  profileNftTokenId?: number;
+  lastUpdated: string;
 }
 
+// Interface for our component state
 interface Profile {
   name: string;
   bio: string;
@@ -24,123 +49,133 @@ interface Profile {
   farcaster: string;
   lens: string;
   blog: string;
-  projects: Project[];
-  contributionWallet?: string;
   supportCount: number;
   visitCount: number;
+  contributionWallet?: string;
+  works: {
+    title: string;
+    description: string;
+    url: string;
+  }[];
+  profileNftTokenId?: number;
 }
 
 export default function ProfilePage() {
   const { address } = useParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isSupportModalOpen, setSupportModalOpen] = useState(false);
 
+  const { address: userAddress } = useAccount();
+  const { authenticated } = usePrivy();
+
+  // Convert to string if address is an array
+  const profileAddress = Array.isArray(address) ? address[0] : address;
+  const isOwnProfile =
+    userAddress && userAddress.toLowerCase() === profileAddress?.toLowerCase();
+
+  // Fetch profile data from the backend API
   useEffect(() => {
-    // Mock data - replace with actual API call to fetch profile data
-    const fetchProfile = async () => {
+    const fetchProfileData = async () => {
       try {
-        // In a real implementation, you would fetch the profile data from your backend/blockchain
-        // Example: const response = await fetch(`/api/profiles/${address}`);
+        setLoading(true);
+        const response = await fetch(
+          `${API_BASE_URL}/api/profile/${profileAddress}`
+        );
 
-        // Mock data for demonstration
-        const mockProfile: Profile = {
-          name: "John Developer",
-          bio: "Full-stack blockchain developer passionate about Web3",
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const profileData: ProfileData = await response.json();
+
+        // Map backend data to our frontend profile structure
+        setProfile({
+          name: profileData.name || "Anonymous Developer",
+          bio: profileData.bio || "No bio provided",
           profilePicture:
+            profileData.profilePictureUrl ||
             "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80",
-          github: "https://github.com/johndeveloper",
-          twitter: "https://twitter.com/johndeveloper",
-          farcaster: "https://farcaster.xyz/u/johndeveloper",
-          lens: "https://lens.xyz/johndeveloper",
-          blog: "https://johndeveloper.com",
-          projects: [
-            {
-              name: "DeFi Dashboard",
-              description:
-                "A comprehensive dashboard for DeFi portfolio tracking",
-              githubUrl: "https://github.com/johndeveloper/defi-dashboard",
-              demoUrl: "https://defi-dashboard.example.com",
-            },
-            {
-              name: "NFT Marketplace",
-              description: "A marketplace for creating and trading NFTs",
-              githubUrl: "https://github.com/johndeveloper/nft-marketplace",
-              demoUrl: "https://nft-marketplace.example.com",
-            },
-            {
-              name: "DAO Governance Tool",
-              description: "A tool for managing DAO proposals and voting",
-              githubUrl: "https://github.com/johndeveloper/dao-governance",
-              demoUrl: "https://dao-governance.example.com",
-            },
-          ],
-          contributionWallet: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-          supportCount: 42,
-          visitCount: 1337,
-        };
+          github: profileData.github || "",
+          twitter: profileData.twitter || "",
+          farcaster: profileData.farcaster || "",
+          lens: profileData.lens || "",
+          blog: profileData.blog || "",
+          supportCount: parseInt(profileData.supportCount) || 0,
+          visitCount: 0, // Not provided by API, could be tracked separately
+          contributionWallet:
+            profileData.contributionWallet || profileData.wallet,
+          works: profileData.works || [],
+          profileNftTokenId: profileData.profileNftTokenId,
+        });
 
-        setProfile(mockProfile);
-
-        // Increment visit count (would be handled by the backend in a real implementation)
-        // await fetch(`/api/profiles/${address}/visit`, { method: 'POST' });
-      } catch (error) {
-        console.error("Error fetching profile:", error);
+        // Log a profile visit (in a real app, you might want to do this only once per session)
+        logProfileVisit(profileAddress);
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+        setError("Failed to load profile data. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
-  }, [address]);
+    if (profileAddress) {
+      fetchProfileData();
+    }
+  }, [profileAddress]);
 
+  // Function to log a profile visit (could be implemented with a backend API call)
+  const logProfileVisit = async (address: string) => {
+    try {
+      // In a complete implementation, you would make an API call here
+      // Example: await fetch(`${API_BASE_URL}/api/profile/${address}/visit`, { method: 'POST' });
+      console.log(`Visit logged for profile: ${address}`);
+    } catch (err) {
+      console.error("Failed to log profile visit:", err);
+    }
+  };
+
+  // Handler for support button click
+  const handleSupportClick = () => {
+    if (!authenticated) {
+      // Prompt user to connect wallet first
+      alert("Please connect your wallet to support this developer.");
+      return;
+    }
+    setSupportModalOpen(true);
+  };
+
+  const handleMintNFT = () => {
+    if (!authenticated) {
+      alert("Please connect your wallet first.");
+      return;
+    }
+    // Redirect to the create page which has the minting flow
+    window.location.href = "/create";
+  };
+
+  // Display loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white">
-        {/* Header with WalletConnection */}
-        <header className="border-b border-gray-800 bg-black/50 backdrop-blur-md fixed top-0 w-full z-50">
-          <div className="flex items-center justify-between h-16 px-4 md:px-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center">
-                <span className="font-bold text-white">CB</span>
-              </div>
-              <span className="font-bold text-xl">ChainBento</span>
-            </Link>
-
-            {/* WalletConnection Component */}
-            <WalletConnection />
-          </div>
-        </header>
-
-        <div className="flex justify-center items-center min-h-screen pt-16">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[60vh]">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       </div>
     );
   }
 
-  if (!profile) {
+  // Display error state
+  if (error || !profile) {
     return (
-      <div className="min-h-screen bg-black text-white">
-        {/* Header with WalletConnection */}
-        <header className="border-b border-gray-800 bg-black/50 backdrop-blur-md fixed top-0 w-full z-50">
-          <div className="flex items-center justify-between h-16 px-4 md:px-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center">
-                <span className="font-bold text-white">CB</span>
-              </div>
-              <span className="font-bold text-xl">ChainBento</span>
-            </Link>
-
-            {/* WalletConnection Component */}
-            <WalletConnection />
-          </div>
-        </header>
-
-        <div className="flex flex-col items-center justify-center min-h-screen pt-16 p-4">
-          <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
-          <p className="text-gray-400">
-            The profile you are looking for does not exist or has been removed.
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-100 dark:bg-red-900 p-4 rounded-lg">
+          <h2 className="text-xl font-bold text-red-700 dark:text-red-200">
+            Error Loading Profile
+          </h2>
+          <p className="text-red-700 dark:text-red-200">
+            {error || "Profile not found"}
           </p>
         </div>
       </div>
@@ -171,9 +206,54 @@ export default function ProfilePage() {
             <ProfileCard
               profile={profile}
               address={address as string}
-              onSupportClick={() => setSupportModalOpen(true)}
+              onSupportClick={handleSupportClick}
             />
           </div>
+
+          {profile.profileNftTokenId ? (
+            <div className="mt-4 bg-gray-800 border border-indigo-500 rounded-lg p-4 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-indigo-400 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span className="font-semibold text-indigo-300">
+                  Verified Profile NFT
+                </span>
+              </div>
+              <div className="text-sm text-gray-400">
+                Token ID: {profile.profileNftTokenId}
+              </div>
+              <a
+                href={`https://sepolia.basescan.org/nft/0x1011b31fcb82e77c5eab85b8090c63c3e8670c52/${profile.profileNftTokenId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-indigo-400 hover:text-indigo-300 mt-2 inline-block"
+              >
+                View on Etherscan →
+              </a>
+            </div>
+          ) : isOwnProfile ? (
+            <div className="mt-4 bg-gray-900 border border-gray-700 rounded-lg p-4 text-center">
+              <div className="text-gray-400 mb-3">
+                You haven't minted your Profile NFT yet.
+              </div>
+              <button
+                onClick={handleMintNFT}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white text-sm font-medium"
+              >
+                Mint Profile NFT
+              </button>
+            </div>
+          ) : null}
 
           {/* Profile Details Section */}
           <div className="lg:col-span-2 space-y-8">
@@ -185,57 +265,50 @@ export default function ProfilePage() {
             {/* Projects Section */}
             <div className="bg-gray-800 rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold mb-4">Top Projects</h2>
-              <div className="space-y-6">
-                {profile.projects.map((project, index) => (
-                  <div
-                    key={index}
-                    className="border-b border-gray-700 pb-4 last:border-0 last:pb-0"
-                  >
-                    <h3 className="text-xl font-semibold">{project.name}</h3>
-                    <p className="text-gray-300 mt-2">{project.description}</p>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
-                      >
-                        <svg
-                          className="w-4 h-4 mr-1"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-                        </svg>
-                        GitHub
-                      </a>
-                      <a
-                        href={project.demoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800 transition"
-                      >
-                        <svg
-                          className="w-4 h-4 mr-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                          />
-                        </svg>
-                        Live Demo
-                      </a>
+
+              {profile.works && profile.works.length > 0 ? (
+                <div className="space-y-6">
+                  {profile.works.map((work, index) => (
+                    <div
+                      key={index}
+                      className="border-b border-gray-700 pb-4 last:border-0 last:pb-0"
+                    >
+                      <h3 className="text-xl font-semibold">{work.title}</h3>
+                      <p className="text-gray-300 mt-2">{work.description}</p>
+                      <div className="mt-3 flex flex-wrap gap-3">
+                        {work.url && (
+                          <a
+                            href={work.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800 transition"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                            Visit Project
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-center py-4">
+                  No projects available.
+                </p>
+              )}
             </div>
 
             {/* Activity Section - could be expanded with actual on-chain activity */}

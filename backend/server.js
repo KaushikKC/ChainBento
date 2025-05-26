@@ -63,6 +63,7 @@ const contract = new ethers.Contract(
   [
     "function getSupportCount(address) view returns (uint256)",
     "function getSupporters(address) view returns (address[])",
+    "function profileNFTs(address) view returns (uint256)",
     "event Supported(address indexed supporter, address indexed creator, uint256 amount)",
     "event ProfileMinted(address indexed user, uint256 tokenId)",
     "event EndorsementMinted(address indexed from, address indexed to, uint256 tokenId)",
@@ -366,59 +367,59 @@ app.post("/api/verify/transaction", async (req, res) => {
 });
 
 // 6. POST /api/support/log - Log support action from frontend transaction
-app.post("/api/support/log", async (req, res) => {
+app.post("/api/profile/mint-log-simple", async (req, res) => {
   try {
-    const { supporter, recipient, amount, txHash, messageIpfs } = req.body;
+    const { wallet } = req.body;
 
-    if (!ethers.isAddress(supporter) || !ethers.isAddress(recipient)) {
-      return res.status(400).json({ error: "Invalid addresses" });
+    if (!ethers.isAddress(wallet)) {
+      return res.status(400).json({ error: "Invalid wallet address" });
     }
 
-    if (!txHash) {
-      return res.status(400).json({ error: "Transaction hash is required" });
-    }
+    // Call the profileNFTs function directly to get token ID
+    console.log(`Getting token ID for wallet: ${wallet}`);
+    const tokenId = await contract.profileNFTs(wallet);
+    console.log(`Retrieved token ID: ${tokenId.toString()}`);
 
-    // Verify the transaction happened on-chain
-    const verification = await verifyTransaction(txHash, "support", {
-      supporter,
-      recipient,
-    });
+    // Update profile with token ID
+    const updatedProfile = await UserProfile.findOneAndUpdate(
+      { wallet: ethers.getAddress(wallet) },
+      {
+        profileNftTokenId: tokenId.toString(),
+        lastUpdated: new Date(),
+      },
+      { new: true }
+    );
 
-    if (!verification.verified) {
-      return res.status(400).json({
-        error: "Invalid or unconfirmed transaction",
-        details: verification.reason,
+    if (!updatedProfile) {
+      // Create minimal profile if one doesn't exist
+      const newProfile = new UserProfile({
+        wallet: ethers.getAddress(wallet),
+        profileNftTokenId: tokenId.toString(),
+        lastUpdated: new Date(),
+      });
+      await newProfile.save();
+
+      return res.status(201).json({
+        success: true,
+        profile: newProfile,
+        nft: {
+          tokenId: tokenId.toString(),
+        },
       });
     }
 
-    // Create support log
-    const supportLog = new SupportLog({
-      supporter: ethers.getAddress(supporter),
-      recipient: ethers.getAddress(recipient),
-      amount,
-      txHash,
-      messageIpfs,
-    });
-
-    await supportLog.save();
-
-    // Update recipient's support count in MongoDB
-    await UserProfile.findOneAndUpdate(
-      { wallet: ethers.getAddress(recipient) },
-      { $inc: { supportCount: 1 } }
-    );
-
-    res.status(201).json({
+    res.json({
       success: true,
-      supportLog,
-      transaction: {
-        hash: txHash,
-        blockNumber: verification.receipt.blockNumber,
+      profile: updatedProfile,
+      nft: {
+        tokenId: tokenId.toString(),
       },
     });
   } catch (error) {
-    console.error("Support log error:", error);
-    res.status(500).json({ error: "Failed to log support" });
+    console.error("Simplified NFT minting log error:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to log profile NFT: " + error.message });
   }
 });
 
