@@ -3,6 +3,22 @@
 import { useState, useEffect, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import Image from "next/image";
+import { useDataContext } from "@/context/DataContext";
+import { usePrivy } from "@privy-io/react-auth";
+import { useAccount } from "wagmi";
+import { ethers, Contract } from "ethers";
+
+// Constants that would typically come from environment variables
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const CONTRACT_ADDRESS =
+  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
+  "0x1011b31fcB82E77c5EAB85B8090c63C3E8670c52";
+
+// ABI for the support contract - this should be imported from a separate file in a real app
+const CONTRACT_ABI = [
+  "function support(address recipient) external payable",
+  // Add other functions as needed
+];
 
 interface Token {
   symbol: string;
@@ -25,7 +41,7 @@ export default function SupportModal({
   profileAddress,
 }: SupportModalProps) {
   const [step, setStep] = useState<
-    "amount" | "message" | "confirming" | "success"
+    "amount" | "message" | "confirming" | "success" | "error"
   >("amount");
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [amount, setAmount] = useState<string>("");
@@ -33,6 +49,15 @@ export default function SupportModal({
   const [mintNFT, setMintNFT] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
+
+  const { address: userAddress } = useAccount();
+  const { authenticated } = usePrivy();
+  const { getContractInstance } = useDataContext();
+
+  // Check if user is trying to support their own profile
+  const isOwnProfile =
+    userAddress && userAddress.toLowerCase() === profileAddress.toLowerCase();
 
   // Available tokens for support
   const availableTokens: Token[] = [
@@ -56,6 +81,84 @@ export default function SupportModal({
     },
   ];
 
+  /**
+   * Handles direct support transaction to the profile owner
+   * @param amount Amount of ETH to send
+   * @param recipient Recipient address
+   */
+  const handleDirectSupport = async (amount: string, recipient: string) => {
+    if (!authenticated || !userAddress) {
+      setError("Please connect your wallet first.");
+      return false;
+    }
+
+    if (isOwnProfile) {
+      setError("You cannot support your own profile.");
+      return false;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      setStep("confirming");
+
+      // Get contract instance using the context function
+      const contract = await getContractInstance(
+        CONTRACT_ADDRESS,
+        CONTRACT_ABI
+      );
+
+      if (!contract) {
+        throw new Error("Failed to initialize contract");
+      }
+
+      // Calculate amount in wei
+      const amountInWei = ethers.utils.parseEther(amount);
+
+      console.log(`Supporting ${recipient} with ${amount} ETH...`);
+
+      // Call the support function with value
+      const transaction = await contract.support(recipient, {
+        value: amountInWei,
+      });
+
+      console.log("Transaction sent:", transaction);
+      setTxHash(transaction.hash);
+
+      // Wait for a few seconds to give the transaction time to be mined
+      await new Promise((resolve) => setTimeout(resolve, 8000));
+
+      // Log support with backend
+      try {
+        await fetch(`${API_BASE_URL}/api/support/log`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            supporter: userAddress,
+            recipient: recipient,
+            amount: parseFloat(amount),
+          }),
+        });
+        console.log("Support logged with backend");
+      } catch (logErr) {
+        console.error("Failed to log support with backend:", logErr);
+        // Continue even if logging fails - the transaction was successful
+      }
+
+      setStep("success");
+      return true;
+    } catch (err: any) {
+      console.error("Error supporting developer:", err);
+      setError(err.message || "Failed to support. Please try again.");
+      setStep("error");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Set initial selected token to ETH
   useEffect(() => {
     if (availableTokens.length > 0) {
@@ -71,10 +174,11 @@ export default function SupportModal({
       setMessage("");
       setMintNFT(false);
       setError(null);
+      setTxHash(null);
     }
   }, [isOpen]);
 
-  // Handle form submission
+  // Handle form submission - this connects to the handleDirectSupport function
   const handleSubmit = async () => {
     if (!selectedToken || !amount || parseFloat(amount) <= 0) {
       setError("Please select a token and enter a valid amount");
@@ -85,9 +189,6 @@ export default function SupportModal({
     setError(null);
 
     try {
-      // Here you would handle the blockchain transaction
-      // This is just a mock implementation for demonstration
-
       // Step 1: Move to message step
       if (step === "amount") {
         setStep("message");
@@ -95,27 +196,24 @@ export default function SupportModal({
         return;
       }
 
-      // Step 2: Move to confirming step
+      // Step 2: Process transaction
       if (step === "message") {
-        setStep("confirming");
+        // Only support ETH for now - extend this logic for other tokens
+        if (selectedToken.symbol !== "ETH") {
+          throw new Error("Only ETH is currently supported");
+        }
 
-        // Simulate transaction processing
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // Call the direct support function with the entered amount
+        await handleDirectSupport(amount, profileAddress);
 
-        // In a real implementation, this would:
-        // 1. Connect to wallet (MetaMask, WalletConnect, etc.)
-        // 2. Send the transaction to transfer tokens
-        // 3. If mintNFT is true, mint a Proof-of-Support NFT
-        // 4. Store the message on IPFS
-
-        // Simulate successful transaction
-        setStep("success");
+        // Note: handleDirectSupport will handle setting the step and error states
       }
     } catch (err: any) {
       console.error("Error processing support transaction:", err);
       setError(
         err.message || "Failed to process transaction. Please try again."
       );
+      setStep("error");
     } finally {
       setIsSubmitting(false);
     }
@@ -173,6 +271,7 @@ export default function SupportModal({
                   {step === "message" && "Add a Message"}
                   {step === "confirming" && "Processing Transaction"}
                   {step === "success" && "Support Successful!"}
+                  {step === "error" && "Transaction Failed"}
                 </Dialog.Title>
 
                 {/* Error Message */}
@@ -204,7 +303,12 @@ export default function SupportModal({
                               selectedToken?.symbol === token.symbol
                                 ? "border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-400"
                                 : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+                            } ${
+                              token.symbol !== "ETH"
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                             }`}
+                            disabled={token.symbol !== "ETH"} // Only enable ETH for now
                           >
                             <Image
                               src={token.icon}
@@ -216,6 +320,11 @@ export default function SupportModal({
                             <span className="text-sm font-medium">
                               {token.symbol}
                             </span>
+                            {token.symbol !== "ETH" && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Coming soon
+                              </span>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -354,6 +463,18 @@ export default function SupportModal({
                         ? "Your Proof-of-Support NFT has been minted and will appear in your wallet shortly."
                         : "Your contribution has been sent successfully."}
                     </p>
+                    {txHash && (
+                      <div className="mt-2">
+                        <a
+                          href={`https://sepolia.basescan.org/tx/${txHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 text-xs"
+                        >
+                          View transaction on BaseScan →
+                        </a>
+                      </div>
+                    )}
                     {message && (
                       <div className="mt-4 w-full bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
                         <p className="text-sm text-gray-700 dark:text-gray-300 italic">
@@ -361,6 +482,41 @@ export default function SupportModal({
                         </p>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Error State */}
+                {step === "error" && (
+                  <div className="flex flex-col items-center justify-center py-6">
+                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mb-4">
+                      <svg
+                        className="w-8 h-8 text-red-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 font-medium text-lg">
+                      Transaction Failed
+                    </p>
+                    <p className="text-sm text-red-500 mt-2 text-center">
+                      {error ||
+                        "There was an error processing your transaction."}
+                    </p>
+                    <button
+                      onClick={() => setStep("amount")}
+                      className="mt-4 text-blue-500 hover:text-blue-600 text-sm"
+                    >
+                      Try Again
+                    </button>
                   </div>
                 )}
 
@@ -386,7 +542,8 @@ export default function SupportModal({
                         !selectedToken ||
                         !amount ||
                         parseFloat(amount) <= 0 ||
-                        isSubmitting
+                        isSubmitting ||
+                        (selectedToken && selectedToken.symbol !== "ETH") // Only enable ETH for now
                       }
                     >
                       Continue
@@ -404,7 +561,7 @@ export default function SupportModal({
                     </button>
                   )}
 
-                  {step === "success" && (
+                  {(step === "success" || step === "error") && (
                     <button
                       type="button"
                       className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
