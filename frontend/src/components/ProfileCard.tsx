@@ -126,15 +126,15 @@ export default function ProfileCard({
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
       {/* Profile Header */}
       <div className="relative">
-        {/* Profile Cover - could be customizable in a real implementation */}
-        <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+        {/* Profile Cover - stylish gradient background */}
+        <div className="h-32 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
 
         {/* Profile Picture */}
         <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-16">
-          <div className="rounded-full border-4 border-white dark:border-gray-800 overflow-hidden">
+          <div className="rounded-full border-4 border-white shadow-md overflow-hidden">
             <Image
               src={profile.profilePicture}
               alt={`${profile.name}'s profile picture`}
@@ -148,28 +148,38 @@ export default function ProfileCard({
 
       {/* Profile Info */}
       <div className="pt-20 pb-6 px-6 text-center">
-        <h2 className="text-2xl font-bold">{profile.name}</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{profile.name}</h2>
 
-        <div className="mt-2 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-          <svg
-            className="w-4 h-4 mr-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-          <span>{formatAddress(address)}</span>
+        <div className="mt-2 flex items-center justify-center text-sm text-gray-500">
+          <div className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+            <span className="mr-1 text-blue-500 font-medium">
+              {formatAddress(address)}
+            </span>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
         </div>
 
         {!compact && (
-          <p className="mt-4 text-gray-600 dark:text-gray-400 line-clamp-3">
+          <p className="mt-4 text-gray-600 line-clamp-3 bg-gray-50 p-4 rounded-lg">
             {profile.bio}
           </p>
         )}
@@ -184,7 +194,7 @@ export default function ProfileCard({
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition"
+                  className="text-gray-500 hover:text-blue-600 transition-colors p-2 bg-gray-50 rounded-full hover:bg-blue-50"
                   aria-label={`Visit ${social.name}`}
                 >
                   {social.icon}
@@ -195,22 +205,18 @@ export default function ProfileCard({
 
         {/* Stats */}
         {!compact && (
-          <div className="mt-6 flex justify-center space-x-6 text-sm">
-            <div className="flex flex-col items-center">
-              <span className="font-semibold text-lg">
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 flex flex-col items-center">
+              <span className="font-semibold text-xl text-gray-800">
                 {profile.supportCount}
               </span>
-              <span className="text-gray-600 dark:text-gray-400">
-                Supporters
-              </span>
+              <span className="text-sm text-gray-600">Supporters</span>
             </div>
-            <div className="flex flex-col items-center">
-              <span className="font-semibold text-lg">
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-3 flex flex-col items-center">
+              <span className="font-semibold text-xl text-gray-800">
                 {profile.visitCount}
               </span>
-              <span className="text-gray-600 dark:text-gray-400">
-                Profile Views
-              </span>
+              <span className="text-sm text-gray-600">Profile Views</span>
             </div>
           </div>
         )}
@@ -219,8 +225,22 @@ export default function ProfileCard({
         <div className="mt-6">
           <button
             onClick={onSupportClick}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg font-medium shadow-sm transition-all hover:shadow-md w-full flex items-center justify-center"
           >
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
             Support Developer
           </button>
         </div>
@@ -228,10 +248,9 @@ export default function ProfileCard({
         {/* Contribution Wallet - if different from profile address */}
         {profile.contributionWallet &&
           profile.contributionWallet !== address && (
-            <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
-              <span>
-                Contribution Wallet: {formatAddress(profile.contributionWallet)}
-              </span>
+            <div className="mt-4 text-xs bg-blue-50 rounded-lg p-2 text-gray-600">
+              <span className="font-medium">Contribution Wallet:</span>{" "}
+              {formatAddress(profile.contributionWallet)}
             </div>
           )}
       </div>

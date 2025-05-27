@@ -147,15 +147,15 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Header with WalletConnection */}
-      <header className="border-b border-gray-800 bg-black/50 backdrop-blur-md fixed top-0 w-full z-50">
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-md fixed top-0 w-full z-50 shadow-sm">
         <div className="flex items-center justify-between h-16 px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <span className="font-bold text-white">CB</span>
             </div>
-            <span className="font-bold text-xl">ChainBento</span>
+            <span className="font-bold text-xl text-gray-800">ChainBento</span>
           </Link>
 
           {/* WalletConnection Component */}
@@ -165,8 +165,10 @@ export default function ExplorePage() {
 
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold mb-4">Explore Developers</h1>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold mb-4 text-gray-800">
+            Explore Developers
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Discover talented developers in the Web3 ecosystem and support their
             work
           </p>
@@ -180,11 +182,11 @@ export default function ExplorePage() {
                 <input
                   type="text"
                   placeholder="Search developers..."
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 pl-11 rounded-lg border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <div className="absolute right-3 top-3 text-gray-500">
+                <div className="absolute left-3 top-3 text-gray-400">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-6 w-6"
@@ -207,22 +209,25 @@ export default function ExplorePage() {
               defaultValue={SortBy.SUPPORT_COUNT}
               className="w-full md:w-auto"
             >
-              <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
+              <TabsList className="grid w-full grid-cols-3 md:w-[400px] bg-gray-100 rounded-lg p-1">
                 <TabsTrigger
                   value={SortBy.SUPPORT_COUNT}
                   onClick={() => setActiveTab(SortBy.SUPPORT_COUNT)}
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md"
                 >
                   Most Supported
                 </TabsTrigger>
                 <TabsTrigger
                   value={SortBy.VISIT_COUNT}
                   onClick={() => setActiveTab(SortBy.VISIT_COUNT)}
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md"
                 >
                   Most Visited
                 </TabsTrigger>
                 <TabsTrigger
                   value={SortBy.RECENT}
                   onClick={() => setActiveTab(SortBy.RECENT)}
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md"
                 >
                   Most Recent
                 </TabsTrigger>
@@ -240,9 +245,11 @@ export default function ExplorePage() {
 
         {/* No Results */}
         {!loading && filteredProfiles.length === 0 && (
-          <div className="text-center py-20">
-            <h3 className="text-2xl font-semibold mb-2">No developers found</h3>
-            <p className="text-gray-400">
+          <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <h3 className="text-2xl font-semibold mb-2 text-gray-800">
+              No developers found
+            </h3>
+            <p className="text-gray-600">
               Try adjusting your search or filter criteria
             </p>
           </div>
@@ -251,23 +258,28 @@ export default function ExplorePage() {
         {/* Profiles Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProfiles.map((profile) => (
-            <Link href={`/profile/${profile.address}`} key={profile.address}>
-              <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <Link
+              href={`/profile/${profile.address}`}
+              key={profile.address}
+              className="group"
+            >
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 group-hover:border-blue-200">
                 <div className="flex items-center p-6">
                   <div className="flex-shrink-0">
-                    <Image
-                      src={profile.profilePicture}
-                      alt={`${profile.name}'s profile picture`}
-                      width={64}
-                      height={64}
-                      className="rounded-full object-cover"
-                    />
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-sm">
+                      <Image
+                        src={profile.profilePicture}
+                        alt={`${profile.name}'s profile picture`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-lg font-semibold text-gray-800">
                       {profile.name}
                     </h3>
-                    <p className="text-gray-400 text-sm line-clamp-2">
+                    <p className="text-gray-600 text-sm line-clamp-2">
                       {profile.bio}
                     </p>
                   </div>
@@ -278,7 +290,7 @@ export default function ExplorePage() {
                     <div className="flex items-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-red-500 mr-1"
+                        className="h-5 w-5 text-rose-500 mr-1"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -288,7 +300,7 @@ export default function ExplorePage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span className="text-gray-300">
+                      <span className="text-gray-700">
                         {profile.supportCount} supporters
                       </span>
                     </div>
@@ -306,21 +318,21 @@ export default function ExplorePage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span className="text-gray-300">
+                      <span className="text-gray-700">
                         {profile.visitCount} visits
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="px-6 pb-6 flex gap-2">
+                <div className="px-6 pb-6 flex gap-3 pt-1 border-t border-gray-100">
                   {profile.github && (
                     <a
                       href={profile.github}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-gray-400 hover:text-gray-200"
+                      className="text-gray-500 hover:text-gray-800 transition-colors"
                     >
                       <svg
                         className="w-5 h-5"
@@ -338,7 +350,7 @@ export default function ExplorePage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-gray-400 hover:text-gray-200"
+                      className="text-gray-500 hover:text-blue-500 transition-colors"
                     >
                       <svg
                         className="w-5 h-5"
@@ -350,6 +362,9 @@ export default function ExplorePage() {
                       </svg>
                     </a>
                   )}
+                  <span className="ml-auto bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center justify-center">
+                    View Profile
+                  </span>
                 </div>
               </div>
             </Link>
@@ -359,21 +374,47 @@ export default function ExplorePage() {
         {/* Pagination - can be implemented for larger datasets */}
         {filteredProfiles.length > 0 && (
           <div className="mt-10 flex justify-center">
-            <nav className="inline-flex items-center">
-              <button className="px-3 py-1 rounded-l-md border border-gray-600 bg-gray-800 text-gray-400 hover:bg-gray-700">
-                Previous
+            <nav className="inline-flex items-center rounded-lg overflow-hidden shadow-sm">
+              <button className="px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
               </button>
-              <button className="px-3 py-1 border-t border-b border-gray-600 bg-blue-500 text-white">
+              <button className="px-4 py-2 bg-blue-500 text-white border border-blue-500">
                 1
               </button>
-              <button className="px-3 py-1 border-t border-b border-gray-600 bg-gray-800 text-gray-400 hover:bg-gray-700">
+              <button className="px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">
                 2
               </button>
-              <button className="px-3 py-1 border-t border-b border-gray-600 bg-gray-800 text-gray-400 hover:bg-gray-700">
+              <button className="px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">
                 3
               </button>
-              <button className="px-3 py-1 rounded-r-md border border-gray-600 bg-gray-800 text-gray-400 hover:bg-gray-700">
-                Next
+              <button className="px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
               </button>
             </nav>
           </div>

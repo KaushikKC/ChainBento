@@ -275,6 +275,82 @@ app.get("/api/profile/:address", async (req, res) => {
   }
 });
 
+// 2.5 PUT /api/profile/:address - Update profile
+app.put("/api/profile/:address", async (req, res) => {
+  try {
+    const { address } = req.params;
+    const {
+      name,
+      bio,
+      profilePictureUrl,
+      farcaster,
+      github,
+      twitter,
+      lens,
+      blog,
+      works,
+      contributionWallet,
+    } = req.body;
+
+    if (!ethers.isAddress(address)) {
+      return res.status(400).json({ error: "Invalid wallet address" });
+    }
+
+    // Find the profile first
+    const existingProfile = await UserProfile.findOne({
+      wallet: ethers.getAddress(address),
+    });
+
+    if (!existingProfile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    // Update the profile fields
+    const profileData = {
+      name,
+      bio,
+      profilePictureUrl,
+      farcaster,
+      github,
+      twitter,
+      lens,
+      blog,
+      works,
+      contributionWallet,
+      lastUpdated: new Date(),
+    };
+
+    // Update only non-undefined fields to prevent overwriting with null values
+    Object.keys(profileData).forEach((key) => {
+      if (profileData[key] !== undefined) {
+        existingProfile[key] = profileData[key];
+      }
+    });
+
+    await existingProfile.save();
+
+    // Get on-chain data to include in response
+    const onChainSupportCount = await contract.getSupportCount(address);
+    const supporters = await contract.getSupporters(address);
+
+    // Combine off-chain and on-chain data
+    const response = {
+      ...existingProfile.toObject(),
+      supportCount: onChainSupportCount.toString(),
+      supporters: supporters.map((addr) => addr.toLowerCase()),
+    };
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      profile: response,
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+});
+
 // 3. GET /api/profiles/trending - Trending profiles
 app.get("/api/profiles/trending", async (req, res) => {
   try {

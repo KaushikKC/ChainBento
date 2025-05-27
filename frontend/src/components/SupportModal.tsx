@@ -261,14 +261,48 @@ export default function SupportModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
-                {/* Header */}
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all border border-gray-100">
+                {/* Header with improved styling */}
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 text-center mb-4"
+                  className="text-xl font-bold text-gray-800 text-center mb-4 pb-2 border-b border-gray-100"
                 >
-                  {step === "amount" && `Support ${profileName}`}
-                  {step === "message" && "Add a Message"}
+                  {step === "amount" && (
+                    <div className="flex items-center justify-center gap-2">
+                      <svg
+                        className="w-6 h-6 text-blue-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span>Support {profileName}</span>
+                    </div>
+                  )}
+                  {step === "message" && (
+                    <div className="flex items-center justify-center gap-2">
+                      <svg
+                        className="w-6 h-6 text-blue-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        />
+                      </svg>
+                      <span>Add a Message</span>
+                    </div>
+                  )}
                   {step === "confirming" && "Processing Transaction"}
                   {step === "success" && "Support Successful!"}
                   {step === "error" && "Transaction Failed"}
@@ -276,21 +310,34 @@ export default function SupportModal({
 
                 {/* Error Message */}
                 {error && (
-                  <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg text-sm">
-                    {error}
+                  <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100 flex items-start">
+                    <svg
+                      className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>{error}</span>
                   </div>
                 )}
 
                 {/* Step 1: Select Token & Amount */}
                 {step === "amount" && (
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                  <div className="space-y-5">
+                    <p className="text-sm text-gray-600 text-center bg-blue-50 p-3 rounded-lg">
                       Choose a token and amount to support {profileName}'s work
                     </p>
 
                     {/* Token Selection */}
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Select Token
                       </label>
                       <div className="grid grid-cols-3 gap-2">
@@ -301,8 +348,8 @@ export default function SupportModal({
                             onClick={() => setSelectedToken(token)}
                             className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all ${
                               selectedToken?.symbol === token.symbol
-                                ? "border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-400"
-                                : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+                                ? "border-blue-500 bg-blue-50 shadow-sm"
+                                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                             } ${
                               token.symbol !== "ETH"
                                 ? "opacity-50 cursor-not-allowed"
@@ -317,11 +364,11 @@ export default function SupportModal({
                               height={32}
                               className="mb-2"
                             />
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium text-gray-800">
                               {token.symbol}
                             </span>
                             {token.symbol !== "ETH" && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              <span className="text-xs text-gray-500 mt-1">
                                 Coming soon
                               </span>
                             )}
@@ -334,16 +381,16 @@ export default function SupportModal({
                     <div>
                       <label
                         htmlFor="amount"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                        className="block text-sm font-medium text-gray-700 mb-2"
                       >
                         Amount
                       </label>
-                      <div className="mt-1 relative rounded-md shadow-sm">
+                      <div className="relative rounded-lg shadow-sm">
                         <input
                           type="number"
                           name="amount"
                           id="amount"
-                          className="block w-full pr-12 pl-4 py-3 sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                          className="block w-full pr-12 pl-4 py-3 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
                           placeholder="0.00"
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}
@@ -351,7 +398,7 @@ export default function SupportModal({
                           step="0.01"
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <span className="text-gray-500 dark:text-gray-400 sm:text-sm">
+                          <span className="text-gray-500 sm:text-sm bg-gray-100 px-2 py-1 rounded-md">
                             {selectedToken?.symbol || "ETH"}
                           </span>
                         </div>
@@ -359,64 +406,69 @@ export default function SupportModal({
                     </div>
 
                     {/* NFT Minting Option */}
-                    <div className="flex items-center">
-                      <input
-                        id="mint-nft"
-                        name="mint-nft"
-                        type="checkbox"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        checked={mintNFT}
-                        onChange={(e) => setMintNFT(e.target.checked)}
-                      />
-                      <label
-                        htmlFor="mint-nft"
-                        className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
-                      >
-                        Mint Proof-of-Support NFT
-                      </label>
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                      <div className="flex items-center">
+                        <input
+                          id="mint-nft"
+                          name="mint-nft"
+                          type="checkbox"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          checked={mintNFT}
+                          onChange={(e) => setMintNFT(e.target.checked)}
+                        />
+                        <label
+                          htmlFor="mint-nft"
+                          className="ml-2 block text-sm font-medium text-gray-700"
+                        >
+                          Mint Proof-of-Support NFT
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2 pl-6">
+                        Minting an NFT will require additional gas fees.
+                      </p>
                     </div>
-
-                    <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                      Minting an NFT will require additional gas fees.
-                    </p>
                   </div>
                 )}
 
                 {/* Step 2: Add Message */}
                 {step === "message" && (
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                  <div className="space-y-5">
+                    <p className="text-sm text-gray-600 text-center bg-blue-50 p-3 rounded-lg">
                       Add an optional message to {profileName} (stored on IPFS)
                     </p>
 
-                    <div className="mt-4">
+                    <div>
                       <textarea
                         rows={4}
-                        className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
                         placeholder="Write a message of support or feedback (optional)"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                       />
                     </div>
 
-                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
-                      <h4 className="font-medium text-sm mb-2">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <h4 className="font-medium text-sm mb-3 text-gray-700">
                         Transaction Summary
                       </h4>
-                      <div className="flex justify-between text-sm">
-                        <span>Amount:</span>
-                        <span>
+                      <div className="flex justify-between text-sm py-2 border-b border-gray-200">
+                        <span className="text-gray-600">Amount:</span>
+                        <span className="font-medium text-gray-800">
                           {amount} {selectedToken?.symbol}
                         </span>
                       </div>
-                      <div className="flex justify-between text-sm mt-1">
-                        <span>Recipient:</span>
-                        <span>{formatAddress(profileAddress)}</span>
+                      <div className="flex justify-between text-sm py-2 border-b border-gray-200">
+                        <span className="text-gray-600">Recipient:</span>
+                        <span className="font-medium text-gray-800">
+                          {formatAddress(profileAddress)}
+                        </span>
                       </div>
                       {mintNFT && (
-                        <div className="flex justify-between text-sm mt-1">
-                          <span>Proof-of-Support NFT:</span>
-                          <span>Yes</span>
+                        <div className="flex justify-between text-sm py-2">
+                          <span className="text-gray-600">
+                            Proof-of-Support NFT:
+                          </span>
+                          <span className="font-medium text-blue-600">Yes</span>
                         </div>
                       )}
                     </div>
@@ -425,12 +477,12 @@ export default function SupportModal({
 
                 {/* Step 3: Processing Transaction */}
                 {step === "confirming" && (
-                  <div className="flex flex-col items-center justify-center py-6">
-                    <div className="w-16 h-16 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mb-4"></div>
-                    <p className="text-gray-700 dark:text-gray-300">
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <div className="w-20 h-20 border-t-4 border-b-4 border-blue-500 rounded-full animate-spin mb-6"></div>
+                    <p className="text-gray-800 font-medium text-lg">
                       Processing your transaction...
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    <p className="text-sm text-gray-600 mt-2">
                       Please confirm the transaction in your wallet
                     </p>
                   </div>
@@ -439,9 +491,9 @@ export default function SupportModal({
                 {/* Step 4: Success */}
                 {step === "success" && (
                   <div className="flex flex-col items-center justify-center py-6">
-                    <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 border border-green-200">
                       <svg
-                        className="w-8 h-8 text-green-500"
+                        className="w-10 h-10 text-green-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -455,29 +507,42 @@ export default function SupportModal({
                         />
                       </svg>
                     </div>
-                    <p className="text-gray-700 dark:text-gray-300 font-medium text-lg">
+                    <p className="text-gray-800 font-bold text-xl mb-2">
                       Thank you for your support!
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
+                    <p className="text-sm text-gray-600 text-center max-w-xs">
                       {mintNFT
                         ? "Your Proof-of-Support NFT has been minted and will appear in your wallet shortly."
                         : "Your contribution has been sent successfully."}
                     </p>
                     {txHash && (
-                      <div className="mt-2">
+                      <div className="mt-4 bg-blue-50 rounded-lg p-3 w-full">
                         <a
                           href={`https://sepolia.basescan.org/tx/${txHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600 text-xs"
+                          className="text-blue-600 hover:text-blue-800 text-sm flex items-center justify-center"
                         >
-                          View transaction on BaseScan →
+                          View transaction on BaseScan
+                          <svg
+                            className="w-4 h-4 ml-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
                         </a>
                       </div>
                     )}
                     {message && (
-                      <div className="mt-4 w-full bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
-                        <p className="text-sm text-gray-700 dark:text-gray-300 italic">
+                      <div className="mt-4 w-full bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <p className="text-sm text-gray-700 italic">
                           "{message}"
                         </p>
                       </div>
@@ -488,9 +553,9 @@ export default function SupportModal({
                 {/* Error State */}
                 {step === "error" && (
                   <div className="flex flex-col items-center justify-center py-6">
-                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mb-4">
+                    <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6 border border-red-200">
                       <svg
-                        className="w-8 h-8 text-red-500"
+                        className="w-10 h-10 text-red-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -504,17 +569,30 @@ export default function SupportModal({
                         />
                       </svg>
                     </div>
-                    <p className="text-gray-700 dark:text-gray-300 font-medium text-lg">
+                    <p className="text-gray-800 font-bold text-xl mb-2">
                       Transaction Failed
                     </p>
-                    <p className="text-sm text-red-500 mt-2 text-center">
+                    <p className="text-sm text-red-600 mt-2 text-center max-w-xs">
                       {error ||
                         "There was an error processing your transaction."}
                     </p>
                     <button
                       onClick={() => setStep("amount")}
-                      className="mt-4 text-blue-500 hover:text-blue-600 text-sm"
+                      className="mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
                     >
+                      <svg
+                        className="w-4 h-4 mr-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                        />
+                      </svg>
                       Try Again
                     </button>
                   </div>
@@ -525,7 +603,7 @@ export default function SupportModal({
                   {(step === "amount" || step === "message") && (
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="inline-flex justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                       onClick={onClose}
                       disabled={isSubmitting}
                     >
@@ -536,14 +614,22 @@ export default function SupportModal({
                   {step === "amount" && (
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`inline-flex justify-center rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                        !selectedToken ||
+                        !amount ||
+                        parseFloat(amount) <= 0 ||
+                        isSubmitting ||
+                        (selectedToken && selectedToken.symbol !== "ETH")
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-sm"
+                      }`}
                       onClick={handleSubmit}
                       disabled={
                         !selectedToken ||
                         !amount ||
                         parseFloat(amount) <= 0 ||
                         isSubmitting ||
-                        (selectedToken && selectedToken.symbol !== "ETH") // Only enable ETH for now
+                        (selectedToken && selectedToken.symbol !== "ETH")
                       }
                     >
                       Continue
@@ -553,7 +639,11 @@ export default function SupportModal({
                   {step === "message" && (
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`inline-flex justify-center rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                        isSubmitting
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-sm"
+                      }`}
                       onClick={handleSubmit}
                       disabled={isSubmitting}
                     >
@@ -564,7 +654,7 @@ export default function SupportModal({
                   {(step === "success" || step === "error") && (
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="inline-flex justify-center rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                       onClick={onClose}
                     >
                       Close

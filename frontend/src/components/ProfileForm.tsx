@@ -1,14 +1,14 @@
-"use client";
-
-import { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import Image from "next/image";
 
+// Define the Work interface
 interface Work {
   title: string;
   description: string;
   url: string;
 }
 
+// Define the form data interface
 interface ProfileFormData {
   name: string;
   bio: string;
@@ -19,10 +19,11 @@ interface ProfileFormData {
   blog: string;
   profilePicture: File | null;
   profilePicturePreview: string;
-  works: Work[]; // Changed from projects to works
+  works: Work[];
   contributionWallet: string;
 }
 
+// Define the component props
 interface ProfileFormProps {
   onSubmit: (data: any) => void;
   isSubmitting: boolean;
@@ -261,24 +262,26 @@ export default function ProfileForm({
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* General error message */}
       {errors.form && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
           <p>{errors.form}</p>
         </div>
       )}
 
       {/* Basic Information */}
       <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Basic Information</h2>
+        <h2 className="text-xl font-semibold text-gray-800 pb-2 border-b border-gray-200">
+          Basic Information
+        </h2>
 
         {/* Profile Picture */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Profile Picture
           </label>
 
           <div className="flex items-center space-x-6">
             <div className="flex-shrink-0">
-              <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-md flex items-center justify-center">
                 {formData.profilePicturePreview ? (
                   <Image
                     src={formData.profilePicturePreview}
@@ -304,21 +307,21 @@ export default function ProfileForm({
                 <input
                   type="file"
                   accept="image/*"
-                  className="block w-full text-sm text-gray-500 dark:text-gray-400
+                  className="block w-full text-sm text-gray-500
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-full file:border-0
-                    file:text-sm file:font-medium
+                    file:text-sm file:font-semibold
                     file:bg-blue-50 file:text-blue-700
-                    dark:file:bg-blue-900 dark:file:text-blue-200
-                    hover:file:bg-blue-100 dark:hover:file:bg-blue-800"
+                    hover:file:bg-blue-100 hover:file:text-blue-800
+                    transition cursor-pointer"
                   onChange={handleProfilePictureChange}
                 />
               </label>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-sm text-gray-500">
                 PNG, JPG, or GIF up to 5MB
               </p>
               {errors.profilePicture && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                <p className="mt-1 text-sm text-red-600">
                   {errors.profilePicture}
                 </p>
               )}
@@ -330,9 +333,9 @@ export default function ProfileForm({
         <div>
           <label
             htmlFor="name"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Name *
+            Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -341,16 +344,14 @@ export default function ProfileForm({
             value={formData.name}
             onChange={handleInputChange}
             placeholder="Your name"
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+            className={`w-full px-4 py-3 rounded-lg bg-white border ${
               errors.name
-                ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            }`}
+                ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            } shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-opacity-50`}
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.name}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.name}</p>
           )}
         </div>
 
@@ -358,9 +359,9 @@ export default function ProfileForm({
         <div>
           <label
             htmlFor="bio"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Short Bio *
+            Short Bio <span className="text-red-500">*</span>
           </label>
           <textarea
             id="bio"
@@ -369,27 +370,35 @@ export default function ProfileForm({
             onChange={handleInputChange}
             rows={4}
             placeholder="Tell us about yourself and your work"
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+            className={`w-full px-4 py-3 rounded-lg bg-white border ${
               errors.bio
-                ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            }`}
+                ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            } shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-opacity-50`}
           />
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {formData.bio.length}/500 characters
-          </p>
-          {errors.bio && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.bio}
+          <div className="mt-1 flex justify-between items-center">
+            <p
+              className={`text-sm ${
+                formData.bio.length > 500 ? "text-red-600" : "text-gray-500"
+              }`}
+            >
+              {formData.bio.length}/500 characters
             </p>
-          )}
+            {errors.bio && <p className="text-sm text-red-600">{errors.bio}</p>}
+          </div>
         </div>
       </div>
 
       {/* Social Links */}
       <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Social Links</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-800 pb-2 border-b border-gray-200">
+            Social Links
+          </h2>
+          <span className="text-sm text-gray-500">Optional</span>
+        </div>
+
+        <p className="text-sm text-gray-600">
           Add your social media and platform links to help others connect with
           you.
         </p>
@@ -399,27 +408,36 @@ export default function ProfileForm({
           <div>
             <label
               htmlFor="github"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2"
             >
               GitHub URL
             </label>
-            <input
-              type="url"
-              id="github"
-              name="github"
-              value={formData.github}
-              onChange={handleInputChange}
-              placeholder="https://github.com/yourusername"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.github
-                  ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                  : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-              }`}
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                </svg>
+              </div>
+              <input
+                type="url"
+                id="github"
+                name="github"
+                value={formData.github}
+                onChange={handleInputChange}
+                placeholder="https://github.com/yourusername"
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                  errors.github
+                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                } focus:outline-none focus:ring-2 focus:ring-opacity-50`}
+              />
+            </div>
             {errors.github && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.github}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{errors.github}</p>
             )}
           </div>
 
@@ -427,27 +445,36 @@ export default function ProfileForm({
           <div>
             <label
               htmlFor="twitter"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2"
             >
               Twitter URL
             </label>
-            <input
-              type="url"
-              id="twitter"
-              name="twitter"
-              value={formData.twitter}
-              onChange={handleInputChange}
-              placeholder="https://twitter.com/yourusername"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.twitter
-                  ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                  : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-              }`}
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                </svg>
+              </div>
+              <input
+                type="url"
+                id="twitter"
+                name="twitter"
+                value={formData.twitter}
+                onChange={handleInputChange}
+                placeholder="https://twitter.com/yourusername"
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                  errors.twitter
+                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                } focus:outline-none focus:ring-2 focus:ring-opacity-50`}
+              />
+            </div>
             {errors.twitter && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.twitter}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{errors.twitter}</p>
             )}
           </div>
 
@@ -455,27 +482,36 @@ export default function ProfileForm({
           <div>
             <label
               htmlFor="farcaster"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2"
             >
               Farcaster URL
             </label>
-            <input
-              type="url"
-              id="farcaster"
-              name="farcaster"
-              value={formData.farcaster}
-              onChange={handleInputChange}
-              placeholder="https://farcaster.xyz/u/yourusername"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.farcaster
-                  ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                  : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-              }`}
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M11.9998 0C18.6274 0 24.0001 5.37267 24.0001 12.0003C24.0001 18.6279 18.6274 24.0006 11.9998 24.0006C5.37224 24.0006 -0.000244141 18.6279 -0.000244141 12.0003C-0.000244141 5.37267 5.37224 0 11.9998 0ZM14.8254 5.40698C13.0784 4.5033 10.92 4.5033 9.17225 5.40698L7.53867 6.25033C5.7917 7.15401 4.6665 8.90099 4.6665 10.83V13.17C4.6665 15.099 5.7917 16.846 7.53867 17.75L9.17225 18.593C10.92 19.4967 13.0784 19.4967 14.8254 18.593L16.459 17.75C18.2067 16.846 19.3322 15.099 19.3322 13.17V10.83C19.3322 8.90099 18.2067 7.15401 16.459 6.25033L14.8254 5.40698Z" />
+                </svg>
+              </div>
+              <input
+                type="url"
+                id="farcaster"
+                name="farcaster"
+                value={formData.farcaster}
+                onChange={handleInputChange}
+                placeholder="https://farcaster.xyz/u/yourusername"
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                  errors.farcaster
+                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                } focus:outline-none focus:ring-2 focus:ring-opacity-50`}
+              />
+            </div>
             {errors.farcaster && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.farcaster}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{errors.farcaster}</p>
             )}
           </div>
 
@@ -483,27 +519,36 @@ export default function ProfileForm({
           <div>
             <label
               htmlFor="lens"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2"
             >
               Lens URL
             </label>
-            <input
-              type="url"
-              id="lens"
-              name="lens"
-              value={formData.lens}
-              onChange={handleInputChange}
-              placeholder="https://lens.xyz/yourusername"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.lens
-                  ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                  : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-              }`}
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                </svg>
+              </div>
+              <input
+                type="url"
+                id="lens"
+                name="lens"
+                value={formData.lens}
+                onChange={handleInputChange}
+                placeholder="https://lens.xyz/yourusername"
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                  errors.lens
+                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                } focus:outline-none focus:ring-2 focus:ring-opacity-50`}
+              />
+            </div>
             {errors.lens && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.lens}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{errors.lens}</p>
             )}
           </div>
 
@@ -511,27 +556,42 @@ export default function ProfileForm({
           <div>
             <label
               htmlFor="blog"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2"
             >
               Blog URL
             </label>
-            <input
-              type="url"
-              id="blog"
-              name="blog"
-              value={formData.blog}
-              onChange={handleInputChange}
-              placeholder="https://yourblog.com"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.blog
-                  ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                  : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-              }`}
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                  />
+                </svg>
+              </div>
+              <input
+                type="url"
+                id="blog"
+                name="blog"
+                value={formData.blog}
+                onChange={handleInputChange}
+                placeholder="https://yourblog.com"
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                  errors.blog
+                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                } focus:outline-none focus:ring-2 focus:ring-opacity-50`}
+              />
+            </div>
             {errors.blog && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.blog}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{errors.blog}</p>
             )}
           </div>
         </div>
@@ -540,20 +600,35 @@ export default function ProfileForm({
       {/* Projects */}
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Your Works</h2>
+          <h2 className="text-xl font-semibold text-gray-800 pb-2 border-b border-gray-200">
+            Your Works
+          </h2>
 
           {formData.works.length < 5 && (
             <button
               type="button"
               onClick={addWork}
-              className="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition"
+              className="text-sm px-4 py-2 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors border border-blue-200 shadow-sm font-medium flex items-center"
             >
-              + Add Work
+              <svg
+                className="h-4 w-4 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              Add Work
             </button>
           )}
         </div>
 
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-600">
           Add your blog posts, projects, articles, or any other work you want to
           showcase.
         </p>
@@ -561,17 +636,35 @@ export default function ProfileForm({
         {formData.works.map((work, index) => (
           <div
             key={index}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4"
+            className="border border-gray-200 rounded-xl p-5 space-y-4 bg-white shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex justify-between items-center">
-              <h3 className="font-medium">Work {index + 1}</h3>
+              <h3 className="font-medium text-gray-800 flex items-center">
+                <span className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                  {index + 1}
+                </span>
+                Work Entry
+              </h3>
 
               {formData.works.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeWork(index)}
-                  className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                  className="text-sm text-red-600 hover:text-red-800 flex items-center"
                 >
+                  <svg
+                    className="h-4 w-4 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
                   Remove
                 </button>
               )}
@@ -581,7 +674,7 @@ export default function ProfileForm({
             <div>
               <label
                 htmlFor={`work_${index}_title`}
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-2"
               >
                 Title
               </label>
@@ -593,7 +686,7 @@ export default function ProfileForm({
                   handleWorkChange(index, "title", e.target.value)
                 }
                 placeholder="Title of your work"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
               />
             </div>
 
@@ -601,7 +694,7 @@ export default function ProfileForm({
             <div>
               <label
                 htmlFor={`work_${index}_description`}
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-2"
               >
                 Description
               </label>
@@ -613,7 +706,7 @@ export default function ProfileForm({
                 }
                 rows={2}
                 placeholder="Brief description of your work"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
               />
             </div>
 
@@ -621,24 +714,43 @@ export default function ProfileForm({
             <div>
               <label
                 htmlFor={`work_${index}_url`}
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-2"
               >
                 URL
               </label>
-              <input
-                type="url"
-                id={`work_${index}_url`}
-                value={work.url}
-                onChange={(e) => handleWorkChange(index, "url", e.target.value)}
-                placeholder="https://example.com/your-work"
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                  errors[`work_${index}_url`]
-                    ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                    : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                }`}
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="url"
+                  id={`work_${index}_url`}
+                  value={work.url}
+                  onChange={(e) =>
+                    handleWorkChange(index, "url", e.target.value)
+                  }
+                  placeholder="https://example.com/your-work"
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                    errors[`work_${index}_url`]
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  } focus:outline-none focus:ring-2 focus:ring-opacity-50`}
+                />
+              </div>
               {errors[`work_${index}_url`] && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                <p className="mt-1 text-sm text-red-600">
                   {errors[`work_${index}_url`]}
                 </p>
               )}
@@ -649,34 +761,53 @@ export default function ProfileForm({
 
       {/* Contribution Wallet */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Contribution Wallet</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <h2 className="text-xl font-semibold text-gray-800 pb-2 border-b border-gray-200">
+          Contribution Wallet
+        </h2>
+        <p className="text-sm text-gray-600">
           Add an optional wallet address for receiving support if different from
           your profile wallet.
         </p>
 
-        <div>
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg border border-blue-100">
           <label
             htmlFor="contributionWallet"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            className="block text-sm font-medium text-gray-700 mb-2"
           >
             ETH Wallet Address (Optional)
           </label>
-          <input
-            type="text"
-            id="contributionWallet"
-            name="contributionWallet"
-            value={formData.contributionWallet}
-            onChange={handleInputChange}
-            placeholder="0x..."
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              errors.contributionWallet
-                ? "border-red-300 focus:ring-red-500 dark:border-red-600"
-                : "border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            }`}
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg
+                className="h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+            </div>
+            <input
+              type="text"
+              id="contributionWallet"
+              name="contributionWallet"
+              value={formData.contributionWallet}
+              onChange={handleInputChange}
+              placeholder="0x..."
+              className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                errors.contributionWallet
+                  ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              } focus:outline-none focus:ring-2 focus:ring-opacity-50`}
+            />
+          </div>
           {errors.contributionWallet && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            <p className="mt-1 text-sm text-red-600">
               {errors.contributionWallet}
             </p>
           )}
@@ -684,16 +815,16 @@ export default function ProfileForm({
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-end pt-6">
+      <div className="flex justify-end pt-8">
         <button
           type="submit"
           disabled={isSubmitting || isUploading}
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg font-medium shadow-md transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
         >
           {isSubmitting || isUploading ? (
             <span className="flex items-center">
               <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -715,7 +846,22 @@ export default function ProfileForm({
               Processing...
             </span>
           ) : (
-            "Create Profile"
+            <span className="flex items-center">
+              Create Profile
+              <svg
+                className="ml-2 h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </span>
           )}
         </button>
       </div>

@@ -46,41 +46,43 @@ export default function LandingPage() {
       // Optional: Trigger wallet connection
       login();
     }
-  };
+  }; // This semicolon was likely the issue
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-black/50 backdrop-blur-md fixed top-0 w-full z-50">
-        <div className="flex items-center justify-between h-16 px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center">
-              <span className="font-bold text-white">CB</span>
+      <header className="border-b border-slate-200/60 bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-sm">
+        <div className="flex items-center justify-between h-20 px-6 md:px-8 max-w-7xl mx-auto">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg">
+              <span className="font-bold text-white text-lg">C</span>
             </div>
-            <span className="font-bold text-xl">ChainBento</span>
+            <span className="font-bold text-2xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              ChainBento
+            </span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-8">
             <Link
               href="#features"
-              className="text-sm text-gray-400 hover:text-teal-400 transition-colors"
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-all duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-600 after:transition-all after:duration-200 hover:after:w-full"
             >
               Features
             </Link>
             <Link
               href="#why"
-              className="text-sm text-gray-400 hover:text-teal-400 transition-colors"
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-all duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-600 after:transition-all after:duration-200 hover:after:w-full"
             >
               Why Web3
             </Link>
             <Link
               href="#profiles"
-              className="text-sm text-gray-400 hover:text-teal-400 transition-colors"
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-all duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-600 after:transition-all after:duration-200 hover:after:w-full"
             >
               Explore
             </Link>
             <Link
               href="#how"
-              className="text-sm text-gray-400 hover:text-teal-400 transition-colors"
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-all duration-200 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-600 after:transition-all after:duration-200 hover:after:w-full"
             >
               How It Works
             </Link>
@@ -90,23 +92,31 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="pt-16">
+      <main className="pt-20">
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-20 md:py-32 border-b border-gray-800">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-gray-900/5 to-black"></div>
+        <section className="relative overflow-hidden py-24 md:py-36 border-b border-slate-200/60">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30"></div>
           <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-grid-white/[0.02]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent)] bg-[radial-gradient(circle_at_70%_80%,rgba(147,51,234,0.1),transparent)]" />
           </div>
-          <div className=" relative px-4 md:px-6">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-8 items-center">
-              <div className="space-y-6">
-                <Badge className="bg-indigo-500/10 text-teal-400 hover:bg-indigo-500/20 border-0">
-                  Now in Beta
+          <div className="relative px-6 md:px-8 max-w-7xl mx-auto">
+            <div className="grid gap-16 lg:grid-cols-2 lg:gap-12 items-center">
+              <div className="space-y-8">
+                <Badge className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 hover:from-blue-200 hover:to-purple-200 border-0 px-4 py-2 font-medium shadow-sm">
+                  ✨ Now in Beta
                 </Badge>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-teal-200 to-indigo-300">
-                  Your Web3 Developer Identity, Onchain.
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                  <span className="bg-gradient-to-r from-slate-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
+                    Your Web3
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    Developer Identity
+                  </span>
+                  <br />
+                  <span className="text-slate-700">Onchain.</span>
                 </h1>
-                <p className="text-xl text-gray-400 max-w-[600px]">
+                <p className="text-xl text-slate-600 max-w-[600px] leading-relaxed font-medium">
                   Create a beautiful, verifiable, and contribution-ready profile
                   powered by the blockchain. Showcase your work. Get recognized.
                   Get supported.
@@ -115,112 +125,106 @@ export default function LandingPage() {
                   <Button
                     onClick={handleGetStarted}
                     size="lg"
-                    className="bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-600 hover:to-indigo-700 text-white"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
                   >
                     Get Started
+                    <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-gray-700 hover:bg-gray-800 hover:text-teal-400"
+                    className="border-2 border-slate-300 hover:bg-slate-50 hover:border-blue-300 text-slate-700 px-8 py-6 text-lg font-semibold transition-all duration-300"
                   >
                     Explore Developers
                   </Button>
                 </div>
               </div>
               <div className="relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500 to-indigo-600 rounded-xl blur-xl opacity-50"></div>
-                <div className="relative bg-black rounded-xl border border-gray-800 overflow-hidden">
-                  <div className="p-4 bg-gray-900/50 border-b border-gray-800 flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <div className="ml-2 text-sm text-gray-400">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-2xl opacity-20"></div>
+                <div className="relative bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xl">
+                  <div className="p-6 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                    <div className="ml-4 text-sm text-slate-500 font-medium">
                       profile.chainbento.eth
                     </div>
                   </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center text-2xl font-bold">
+                  <div className="p-8">
+                    <div className="flex items-center gap-5 mb-8">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-3xl font-bold text-white shadow-lg">
                         K
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold">Kaushik.eth</h3>
-                        <p className="text-gray-400 text-sm flex items-center gap-2">
+                        <h3 className="text-2xl font-bold text-slate-900">
+                          Kaushik.eth
+                        </h3>
+                        <p className="text-slate-600 flex items-center gap-2 font-medium">
                           <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
                           Verified Developer
                         </p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                      <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                        <div className="text-2xl font-bold text-teal-400">
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 text-center border border-blue-200">
+                        <div className="text-3xl font-bold text-blue-600">
                           12
                         </div>
-                        <div className="text-xs text-gray-400">Projects</div>
+                        <div className="text-sm text-blue-700 font-medium">
+                          Projects
+                        </div>
                       </div>
-                      <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                        <div className="text-2xl font-bold text-indigo-400">
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-4 text-center border border-purple-200">
+                        <div className="text-3xl font-bold text-purple-600">
                           256
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-sm text-purple-700 font-medium">
                           Contributions
                         </div>
                       </div>
-                      <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                        <div className="text-2xl font-bold text-teal-400">
+                      <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-4 text-center border border-indigo-200">
+                        <div className="text-3xl font-bold text-indigo-600">
                           0.8 ETH
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-sm text-indigo-700 font-medium">
                           Tips Received
                         </div>
                       </div>
-                      <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                        <div className="text-2xl font-bold text-indigo-400">
+                      <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-2xl p-4 text-center border border-teal-200">
+                        <div className="text-3xl font-bold text-teal-600">
                           3
                         </div>
-                        <div className="text-xs text-gray-400">NFT Badges</div>
+                        <div className="text-sm text-teal-700 font-medium">
+                          NFT Badges
+                        </div>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      <Badge
-                        variant="outline"
-                        className="border-teal-500/30 text-teal-400"
-                      >
+                    <div className="flex flex-wrap gap-3 mb-8">
+                      <Badge className="bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1 font-medium">
                         React
                       </Badge>
-                      <Badge
-                        variant="outline"
-                        className="border-indigo-500/30 text-indigo-400"
-                      >
+                      <Badge className="bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1 font-medium">
                         Solidity
                       </Badge>
-                      <Badge
-                        variant="outline"
-                        className="border-teal-500/30 text-teal-400"
-                      >
+                      <Badge className="bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1 font-medium">
                         TypeScript
                       </Badge>
-                      <Badge
-                        variant="outline"
-                        className="border-indigo-500/30 text-indigo-400"
-                      >
+                      <Badge className="bg-teal-100 text-teal-700 border border-teal-200 px-3 py-1 font-medium">
                         EVM
                       </Badge>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-gray-700 hover:bg-gray-800 hover:text-teal-400"
+                        className="border-slate-300 hover:bg-slate-50 text-slate-700 font-medium"
                       >
                         <Github className="w-4 h-4 mr-2" />
                         GitHub
                       </Button>
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="border-gray-700 hover:bg-gray-800 hover:text-teal-400"
+                        className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium"
                       >
                         <Heart className="w-4 h-4 mr-2" />
                         Tip
@@ -234,76 +238,87 @@ export default function LandingPage() {
         </section>
 
         {/* What is ChainBento Section */}
-        <section id="features" className="py-20 border-b border-gray-800">
-          <div className=" px-4 md:px-6">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-indigo-500/10 text-teal-400 hover:bg-indigo-500/20 border-0">
-                Features
+        <section
+          id="features"
+          className="py-24 border-b border-slate-200/60 bg-gradient-to-b from-white to-slate-50"
+        >
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-0 px-4 py-2 font-medium">
+                ✨ Features
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                 One Profile to Showcase Everything You've Built.
               </h2>
-              <p className="text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
                 ChainBento brings together your entire developer journey in one
                 beautiful, verifiable profile.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gray-900/50 border-gray-800 hover:border-teal-500/50 transition-colors">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-teal-500/10 flex items-center justify-center mb-4">
-                    <Wallet className="w-6 h-6 text-teal-400" />
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <Card className="bg-white/70 backdrop-blur-sm border-slate-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl group">
+                <CardHeader className="pb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <Wallet className="w-8 h-8 text-blue-600" />
                   </div>
-                  <CardTitle>Wallet-Based Identity</CardTitle>
+                  <CardTitle className="text-xl font-bold text-slate-900">
+                    Wallet-Based Identity
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-400">
+                  <p className="text-slate-600 leading-relaxed">
                     Connect your wallet to create a unique, verifiable identity
                     that you fully own and control.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900/50 border-gray-800 hover:border-indigo-500/50 transition-colors">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center mb-4">
-                    <Github className="w-6 h-6 text-indigo-400" />
+              <Card className="bg-white/70 backdrop-blur-sm border-slate-200 hover:border-purple-300 transition-all duration-300 hover:shadow-xl group">
+                <CardHeader className="pb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <Github className="w-8 h-8 text-purple-600" />
                   </div>
-                  <CardTitle>GitHub Integration</CardTitle>
+                  <CardTitle className="text-xl font-bold text-slate-900">
+                    GitHub Integration
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-400">
+                  <p className="text-slate-600 leading-relaxed">
                     Showcase your repositories, contributions, and code directly
                     from your GitHub profile.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900/50 border-gray-800 hover:border-teal-500/50 transition-colors">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-teal-500/10 flex items-center justify-center mb-4">
-                    <FileCode className="w-6 h-6 text-teal-400" />
+              <Card className="bg-white/70 backdrop-blur-sm border-slate-200 hover:border-indigo-300 transition-all duration-300 hover:shadow-xl group">
+                <CardHeader className="pb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <FileCode className="w-8 h-8 text-indigo-600" />
                   </div>
-                  <CardTitle>Project Showcase</CardTitle>
+                  <CardTitle className="text-xl font-bold text-slate-900">
+                    Project Showcase
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-400">
+                  <p className="text-slate-600 leading-relaxed">
                     Highlight your best work with rich media, descriptions, and
                     direct links to live projects.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900/50 border-gray-800 hover:border-indigo-500/50 transition-colors">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center mb-4">
-                    <Heart className="w-6 h-6 text-indigo-400" />
+              <Card className="bg-white/70 backdrop-blur-sm border-slate-200 hover:border-pink-300 transition-all duration-300 hover:shadow-xl group">
+                <CardHeader className="pb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <Heart className="w-8 h-8 text-pink-600" />
                   </div>
-                  <CardTitle>Receive Tips</CardTitle>
+                  <CardTitle className="text-xl font-bold text-slate-900">
+                    Receive Tips
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-400">
+                  <p className="text-slate-600 leading-relaxed">
                     Get direct support from fans and users who appreciate your
                     contributions to the ecosystem.
                   </p>
@@ -314,69 +329,77 @@ export default function LandingPage() {
         </section>
 
         {/* Why Web3 Identity Section */}
-        <section id="why" className="py-20 border-b border-gray-800">
-          <div className=" px-4 md:px-6">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <section id="why" className="py-24 border-b border-slate-200/60">
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div>
-                <Badge className="mb-4 bg-indigo-500/10 text-teal-400 hover:bg-indigo-500/20 border-0">
-                  Web3 Advantage
+                <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-0 px-4 py-2 font-medium">
+                  🔗 Web3 Advantage
                 </Badge>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                <h2 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                   Trustless Reputation, Built Onchain.
                 </h2>
-                <p className="text-gray-400 mb-8">
+                <p className="text-xl text-slate-600 mb-10 leading-relaxed">
                   Traditional profiles can be faked or manipulated. With
                   ChainBento, your reputation is verifiable, immutable, and
                   truly yours.
                 </p>
 
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-teal-400 mt-1 flex-shrink-0" />
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    </div>
                     <div>
-                      <h3 className="font-medium">
+                      <h3 className="font-bold text-lg text-slate-900 mb-2">
                         Fully decentralized profile storage
                       </h3>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-slate-600 leading-relaxed">
                         Your profile data lives on IPFS and Ethereum, not on our
                         servers.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-teal-400 mt-1 flex-shrink-0" />
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    </div>
                     <div>
-                      <h3 className="font-medium">
+                      <h3 className="font-bold text-lg text-slate-900 mb-2">
                         Verifiable social and code links
                       </h3>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-slate-600 leading-relaxed">
                         Cryptographically prove ownership of your GitHub,
                         Twitter, and other accounts.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-teal-400 mt-1 flex-shrink-0" />
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    </div>
                     <div>
-                      <h3 className="font-medium">
+                      <h3 className="font-bold text-lg text-slate-900 mb-2">
                         Powered by ENS, IPFS, and Ethereum
                       </h3>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-slate-600 leading-relaxed">
                         Built on battle-tested Web3 infrastructure that's here
                         to stay.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-teal-400 mt-1 flex-shrink-0" />
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    </div>
                     <div>
-                      <h3 className="font-medium">
+                      <h3 className="font-bold text-lg text-slate-900 mb-2">
                         Public support and endorsement NFTs
                       </h3>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-slate-600 leading-relaxed">
                         Receive verifiable endorsements as NFTs from peers and
                         organizations.
                       </p>
@@ -386,15 +409,20 @@ export default function LandingPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500 to-indigo-600 rounded-xl blur-xl opacity-30"></div>
-                <div className="relative bg-black rounded-xl border border-gray-800 overflow-hidden">
-                  <Image
-                    src="/placeholder.svg?height=600&width=600"
-                    width={600}
-                    height={600}
-                    alt="Web3 Identity Visualization"
-                    className="w-full h-auto"
-                  />
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-2xl opacity-20"></div>
+                <div className="relative bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xl p-8">
+                  <div className="text-center">
+                    <div className="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center mb-6">
+                      <Shield className="w-12 h-12 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-4">
+                      Verified & Secure
+                    </h3>
+                    <p className="text-slate-600 leading-relaxed">
+                      Your identity is cryptographically secured and
+                      independently verifiable by anyone on the blockchain.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -402,41 +430,44 @@ export default function LandingPage() {
         </section>
 
         {/* Featured Profiles Section */}
-        <section id="profiles" className="py-20 border-b border-gray-800">
-          <div className=" px-4 md:px-6">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-indigo-500/10 text-teal-400 hover:bg-indigo-500/20 border-0">
-                Community
+        <section
+          id="profiles"
+          className="py-24 border-b border-slate-200/60 bg-gradient-to-b from-slate-50 to-white"
+        >
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-0 px-4 py-2 font-medium">
+                👥 Community
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                 See Who's Building in Public
               </h2>
-              <p className="text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
                 Join a growing community of developers showcasing their work and
                 building their reputation onchain.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3].map((profile) => (
                 <Card
                   key={profile}
-                  className="bg-gray-900/50 border-gray-800 hover:border-teal-500/50 transition-colors"
+                  className="bg-white/80 backdrop-blur-sm border-slate-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl group"
                 >
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center text-lg font-bold">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-xl font-bold text-white shadow-lg">
                         {profile === 1 ? "A" : profile === 2 ? "B" : "C"}
                       </div>
                       <div>
-                        <CardTitle>
+                        <CardTitle className="text-lg font-bold text-slate-900">
                           {profile === 1
                             ? "alex.eth"
                             : profile === 2
                             ? "beth.lens"
                             : "carlos.cb"}
                         </CardTitle>
-                        <CardDescription className="text-gray-400">
+                        <CardDescription className="text-slate-600 font-medium">
                           {profile === 1
                             ? "Full Stack Developer"
                             : profile === 2
@@ -447,31 +478,22 @@ export default function LandingPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="py-4">
-                    <div className="flex gap-2 mb-4">
-                      <Badge
-                        variant="outline"
-                        className="border-teal-500/30 text-teal-400"
-                      >
+                    <div className="flex gap-2 mb-6 flex-wrap">
+                      <Badge className="bg-blue-100 text-blue-700 border border-blue-200 font-medium">
                         {profile === 1
                           ? "React"
                           : profile === 2
                           ? "Solidity"
                           : "Vue"}
                       </Badge>
-                      <Badge
-                        variant="outline"
-                        className="border-indigo-500/30 text-indigo-400"
-                      >
+                      <Badge className="bg-purple-100 text-purple-700 border border-purple-200 font-medium">
                         {profile === 1
                           ? "Node.js"
                           : profile === 2
                           ? "Rust"
                           : "TypeScript"}
                       </Badge>
-                      <Badge
-                        variant="outline"
-                        className="border-teal-500/30 text-teal-400"
-                      >
+                      <Badge className="bg-indigo-100 text-indigo-700 border border-indigo-200 font-medium">
                         {profile === 1
                           ? "GraphQL"
                           : profile === 2
@@ -479,31 +501,37 @@ export default function LandingPage() {
                           : "Web3"}
                       </Badge>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 mb-4">
-                      <div className="bg-gray-800/50 rounded-lg p-2 text-center">
-                        <div className="text-lg font-bold text-teal-400">
+                    <div className="grid grid-cols-3 gap-3 mb-6">
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 text-center border border-blue-200">
+                        <div className="text-lg font-bold text-blue-600">
                           {profile * 4 + 2}
                         </div>
-                        <div className="text-xs text-gray-400">Projects</div>
+                        <div className="text-xs text-blue-700 font-medium">
+                          Projects
+                        </div>
                       </div>
-                      <div className="bg-gray-800/50 rounded-lg p-2 text-center">
-                        <div className="text-lg font-bold text-indigo-400">
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 text-center border border-purple-200">
+                        <div className="text-lg font-bold text-purple-600">
                           {profile * 0.3 + 0.2}Ξ
                         </div>
-                        <div className="text-xs text-gray-400">Tips</div>
+                        <div className="text-xs text-purple-700 font-medium">
+                          Tips
+                        </div>
                       </div>
-                      <div className="bg-gray-800/50 rounded-lg p-2 text-center">
-                        <div className="text-lg font-bold text-teal-400">
+                      <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-3 text-center border border-indigo-200">
+                        <div className="text-lg font-bold text-indigo-600">
                           {profile * 42 + 18}
                         </div>
-                        <div className="text-xs text-gray-400">Followers</div>
+                        <div className="text-xs text-indigo-700 font-medium">
+                          Followers
+                        </div>
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter>
                     <Button
                       variant="outline"
-                      className="w-full border-gray-700 hover:bg-gray-800 hover:text-teal-400"
+                      className="w-full border-slate-300 hover:bg-slate-50 text-slate-700 font-medium"
                     >
                       View Profile
                     </Button>
@@ -512,26 +540,29 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <div className="mt-12 text-center">
-              <Button className="bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-600 hover:to-indigo-700 text-white">
+            <div className="mt-16 text-center">
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                 Claim Your Onchain Profile{" "}
-                <ArrowRight className="ml-2 w-4 h-4" />
+                <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
           </div>
         </section>
 
         {/* How It Works Section */}
-        <section id="how" className="py-20 border-b border-gray-800">
-          <div className=" px-4 md:px-6">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-indigo-500/10 text-teal-400 hover:bg-indigo-500/20 border-0">
-                Get Started
+        <section
+          id="how"
+          className="py-24 border-b border-slate-200/60 bg-gradient-to-b from-white to-slate-50"
+        >
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-0 px-4 py-2 font-medium">
+                🚀 Get Started
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                 How It Works
               </h2>
-              <p className="text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
                 Creating your Web3 developer profile is simple and takes just
                 minutes.
               </p>
@@ -539,64 +570,70 @@ export default function LandingPage() {
 
             <div className="grid md:grid-cols-3 gap-8">
               <div className="relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500 to-indigo-600 rounded-xl blur-xl opacity-20"></div>
-                <Card className="relative bg-gray-900/50 border-gray-800 h-full">
-                  <CardHeader>
-                    <div className="w-12 h-12 rounded-full bg-teal-500/10 flex items-center justify-center mb-4 text-xl font-bold text-teal-400">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-xl opacity-20"></div>
+                <Card className="relative bg-white border-slate-200 h-full group hover:shadow-xl hover:border-blue-300 transition-all duration-300">
+                  <CardHeader className="text-center pb-4">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4 text-xl font-bold text-blue-600">
                       1
                     </div>
-                    <CardTitle>Connect Wallet</CardTitle>
+                    <CardTitle className="text-slate-900">
+                      Connect Wallet
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-400">
+                    <p className="text-slate-600">
                       Connect your Ethereum wallet to get started. We support
                       MetaMask, WalletConnect, Rainbow, and more.
                     </p>
                   </CardContent>
                   <CardFooter className="flex justify-center">
-                    <Wallet className="w-12 h-12 text-teal-400 opacity-50" />
+                    <Wallet className="w-12 h-12 text-blue-500 opacity-50" />
                   </CardFooter>
                 </Card>
               </div>
 
               <div className="relative mt-8 md:mt-12 lg:mt-16">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500 to-indigo-600 rounded-xl blur-xl opacity-20"></div>
-                <Card className="relative bg-gray-900/50 border-gray-800 h-full">
-                  <CardHeader>
-                    <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center mb-4 text-xl font-bold text-indigo-400">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur-xl opacity-20"></div>
+                <Card className="relative bg-white border-slate-200 h-full group hover:shadow-xl hover:border-purple-300 transition-all duration-300">
+                  <CardHeader className="text-center pb-4">
+                    <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-4 text-xl font-bold text-purple-600">
                       2
                     </div>
-                    <CardTitle>Mint Your Profile</CardTitle>
+                    <CardTitle className="text-slate-900">
+                      Mint Your Profile
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-400">
+                    <p className="text-slate-600">
                       Create your profile by adding your details, connecting
                       GitHub, and customizing your showcase.
                     </p>
                   </CardContent>
                   <CardFooter className="flex justify-center">
-                    <Code className="w-12 h-12 text-indigo-400 opacity-50" />
+                    <Code className="w-12 h-12 text-purple-500 opacity-50" />
                   </CardFooter>
                 </Card>
               </div>
 
               <div className="relative mt-8 md:mt-24">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500 to-indigo-600 rounded-xl blur-xl opacity-20"></div>
-                <Card className="relative bg-gray-900/50 border-gray-800 h-full">
-                  <CardHeader>
-                    <div className="w-12 h-12 rounded-full bg-teal-500/10 flex items-center justify-center mb-4 text-xl font-bold text-teal-400">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur-xl opacity-20"></div>
+                <Card className="relative bg-white border-slate-200 h-full group hover:shadow-xl hover:border-indigo-300 transition-all duration-300">
+                  <CardHeader className="text-center pb-4">
+                    <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mb-4 text-xl font-bold text-indigo-600">
                       3
                     </div>
-                    <CardTitle>Start Getting Recognized</CardTitle>
+                    <CardTitle className="text-slate-900">
+                      Start Getting Recognized
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-400">
+                    <p className="text-slate-600">
                       Share your profile, receive tips, collect endorsements,
                       and build your onchain reputation.
                     </p>
                   </CardContent>
                   <CardFooter className="flex justify-center">
-                    <Award className="w-12 h-12 text-teal-400 opacity-50" />
+                    <Award className="w-12 h-12 text-indigo-500 opacity-50" />
                   </CardFooter>
                 </Card>
               </div>
@@ -605,16 +642,16 @@ export default function LandingPage() {
         </section>
 
         {/* Tech Stack / Partners Section */}
-        <section className="py-20 border-b border-gray-800">
-          <div className=" px-4 md:px-6">
+        <section className="py-20 border-b border-slate-200/60 bg-white">
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
             <div className="text-center mb-12">
-              <Badge className="mb-4 bg-indigo-500/10 text-teal-400 hover:bg-indigo-500/20 border-0">
+              <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-0 px-4 py-2 font-medium">
                 Powered By
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                 Built on Web3 Standards
               </h2>
-              <p className="text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
                 ChainBento leverages the best of Web3 technology to create a
                 secure, decentralized developer identity platform.
               </p>
@@ -630,21 +667,27 @@ export default function LandingPage() {
                 "GitHub",
               ].map((tech, index) => (
                 <div key={tech} className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center">
-                    {index === 0 && <div className="text-2xl">Ξ</div>}
+                  <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shadow-sm">
+                    {index === 0 && (
+                      <div className="text-2xl text-blue-600">Ξ</div>
+                    )}
                     {index === 1 && (
-                      <Database className="w-8 h-8 text-teal-400" />
+                      <Database className="w-8 h-8 text-blue-600" />
                     )}
                     {index === 2 && (
-                      <div className="text-xl font-bold">ENS</div>
+                      <div className="text-xl font-bold text-blue-600">ENS</div>
                     )}
                     {index === 3 && <div className="text-xl">🌈</div>}
                     {index === 4 && (
-                      <Shield className="w-8 h-8 text-indigo-400" />
+                      <Shield className="w-8 h-8 text-purple-600" />
                     )}
-                    {index === 5 && <Github className="w-8 h-8" />}
+                    {index === 5 && (
+                      <Github className="w-8 h-8 text-slate-700" />
+                    )}
                   </div>
-                  <span className="text-sm text-gray-400">{tech}</span>
+                  <span className="text-sm text-slate-600 font-medium">
+                    {tech}
+                  </span>
                 </div>
               ))}
             </div>
@@ -652,31 +695,31 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20">
-          <div className=" px-4 md:px-6">
+        <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
             <div className="relative overflow-hidden rounded-2xl">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-indigo-600/20"></div>
-              <div className="absolute inset-0 bg-[url('/placeholder.svg?height=200&width=1200')] opacity-10 bg-center"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+              <div className="absolute inset-0 bg-[url('/placeholder.svg?height=200&width=1200')] opacity-5 bg-center"></div>
               <div className="relative p-8 md:p-12 lg:p-16">
                 <div className="max-w-3xl mx-auto text-center">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                     Ready to Own Your Developer Identity?
                   </h2>
-                  <p className="text-xl text-gray-300 mb-8">
+                  <p className="text-xl text-slate-600 mb-8">
                     Join the growing community of developers building their
                     reputation onchain.
                   </p>
                   <div className="flex flex-wrap justify-center gap-4">
                     <Button
                       size="lg"
-                      className="bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-600 hover:to-indigo-700 text-white"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
                     >
                       Connect Wallet
                     </Button>
                     <Button
                       size="lg"
                       variant="outline"
-                      className="border-gray-700 hover:bg-gray-800 hover:text-teal-400"
+                      className="border-2 border-slate-300 hover:bg-slate-50 hover:border-blue-300 text-slate-700 px-8 py-6 text-lg font-semibold transition-all duration-300"
                     >
                       Learn More
                     </Button>
@@ -689,21 +732,23 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 bg-black">
-        <div className=" px-4 md:px-6 py-12">
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="px-6 md:px-8 max-w-7xl mx-auto py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
             <div className="col-span-2 lg:col-span-2">
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-md bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center">
-                  <span className="font-bold text-white">CB</span>
+              <Link href="/" className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg">
+                  <span className="font-bold text-white text-lg">C</span>
                 </div>
-                <span className="font-bold text-xl">ChainBento</span>
+                <span className="font-bold text-2xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                  ChainBento
+                </span>
               </Link>
-              <p className="text-gray-400 mb-4">
+              <p className="text-slate-600 mb-4">
                 Your Web3 Developer Identity, Onchain.
               </p>
               <div className="flex gap-4">
-                <Link href="#" className="text-gray-400 hover:text-teal-400">
+                <Link href="#" className="text-slate-500 hover:text-blue-600">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -714,10 +759,10 @@ export default function LandingPage() {
                     <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path>
                   </svg>
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-teal-400">
+                <Link href="#" className="text-slate-500 hover:text-blue-600">
                   <Github className="w-5 h-5" />
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-teal-400">
+                <Link href="#" className="text-slate-500 hover:text-blue-600">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -731,12 +776,12 @@ export default function LandingPage() {
               </div>
             </div>
             <div>
-              <h3 className="font-medium mb-4">Product</h3>
+              <h3 className="font-medium mb-4 text-slate-900">Product</h3>
               <ul className="space-y-2">
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Features
                   </Link>
@@ -744,7 +789,7 @@ export default function LandingPage() {
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Pricing
                   </Link>
@@ -752,7 +797,7 @@ export default function LandingPage() {
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Roadmap
                   </Link>
@@ -760,7 +805,7 @@ export default function LandingPage() {
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Documentation
                   </Link>
@@ -768,12 +813,12 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h3 className="font-medium mb-4">Company</h3>
+              <h3 className="font-medium mb-4 text-slate-900">Company</h3>
               <ul className="space-y-2">
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     About
                   </Link>
@@ -781,7 +826,7 @@ export default function LandingPage() {
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Blog
                   </Link>
@@ -789,7 +834,7 @@ export default function LandingPage() {
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Careers
                   </Link>
@@ -797,7 +842,7 @@ export default function LandingPage() {
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Contact
                   </Link>
@@ -805,12 +850,12 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h3 className="font-medium mb-4">Legal</h3>
+              <h3 className="font-medium mb-4 text-slate-900">Legal</h3>
               <ul className="space-y-2">
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Privacy
                   </Link>
@@ -818,7 +863,7 @@ export default function LandingPage() {
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Terms
                   </Link>
@@ -826,7 +871,7 @@ export default function LandingPage() {
                 <li>
                   <Link
                     href="#"
-                    className="text-gray-400 hover:text-teal-400 text-sm"
+                    className="text-slate-600 hover:text-blue-600 text-sm"
                   >
                     Cookie Policy
                   </Link>
@@ -834,8 +879,8 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
+          <div className="border-t border-slate-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-slate-500 text-sm">
               &copy; {new Date().getFullYear()} ChainBento. All rights reserved.
             </p>
             <div className="mt-4 md:mt-0">
@@ -843,12 +888,12 @@ export default function LandingPage() {
                 <Input
                   type="email"
                   placeholder="Subscribe to our newsletter"
-                  className="bg-gray-900 border-gray-700 text-sm w-64"
+                  className="bg-white border-slate-300 text-sm w-64"
                 />
                 <Button
                   type="submit"
                   size="sm"
-                  className="bg-teal-500 hover:bg-teal-600 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Subscribe
                 </Button>
