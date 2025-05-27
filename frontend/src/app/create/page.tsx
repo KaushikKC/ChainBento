@@ -7,8 +7,10 @@ import ProfileForm from "@/components/ProfileForm";
 import WalletConnection from "@/components/WalletConnection";
 import { useAccount } from "wagmi";
 import { usePrivy } from "@privy-io/react-auth";
-import { useDataContext } from "@/context/DataContext";
 import { CheckCircleIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
+
+// Define API base URL - replace with your actual API URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 // Define steps for the creation process
 const steps = [
@@ -24,59 +26,78 @@ export default function CreateProfilePage() {
   const router = useRouter();
   const { address } = useAccount();
   const { authenticated } = usePrivy();
-  const { registerUser } = useDataContext();
 
   // State management
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState<"connect" | "form" | "publish">(
+  const [step, setStep] = useState<"connect" | "form" | "publish" | "minting">(
     authenticated ? "form" : "connect"
   );
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
 
   // Handle form submission
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (formData: any) => {
+    if (!address) {
+      setError("Please connect your wallet first");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
-    setStep("publish");
 
     try {
-      // Submit the form data to the API
-      const response = await registerUser({
-        name: data.name,
-        bio: data.bio,
-        links: {
-          github: data.github || null,
-          twitter: data.twitter || null,
-          farcaster: data.farcaster || null,
-          lens: data.lens || null,
-          blog: data.blog || null,
+      // Prepare the profile data for the API
+      const profileSubmission = {
+        wallet: address,
+        name: formData.name,
+        bio: formData.bio,
+        profilePictureUrl: formData.profilePicturePreview,
+        github: formData.github,
+        twitter: formData.twitter,
+        farcaster: formData.farcaster,
+        lens: formData.lens,
+        blog: formData.blog,
+        works: formData.works,
+        contributionWallet: formData.contributionWallet || address,
+      };
+
+      console.log("Submitting profile data:", profileSubmission);
+
+      // Make the API call to create/update the profile
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        profilePicture: data.profilePictureUrl || null,
-        works: data.works
-          .filter((w: any) => w.title.trim() !== "")
-          .map((w: any) => ({
-            title: w.title,
-            description: w.description || null,
-            url: w.url || null,
-          })),
-        contributionWallet: data.contributionWallet || null,
+        body: JSON.stringify(profileSubmission),
       });
 
-      // Extract the transaction hash from the response
-      if (response?.txHash) {
-        setTxHash(response.txHash);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create profile");
+      }
+
+      const createdProfile = await response.json();
+      console.log("Profile created successfully:", createdProfile);
+
+      // Store the profile data for the next step
+      setProfileData(createdProfile);
+
+      // Move to NFT minting step
+      setStep("minting");
+
+      // If there's a transaction hash in the response
+      if (createdProfile?.txHash) {
+        setTxHash(createdProfile.txHash);
         // Redirect to profile page after successful submission
         setTimeout(() => {
           router.push(`/profile/${address}`);
         }, 3000);
-      } else {
-        throw new Error("Failed to get transaction hash");
       }
     } catch (err: any) {
       console.error("Error creating profile:", err);
       setError(err.message || "Failed to create profile. Please try again.");
-      setStep("form");
     } finally {
       setIsSubmitting(false);
     }

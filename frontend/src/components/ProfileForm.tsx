@@ -1,14 +1,14 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import Image from "next/image";
+import axios from "axios";
 
-// Define the Work interface
+// Define types
 interface Work {
   title: string;
   description: string;
   url: string;
 }
 
-// Define the form data interface
 interface ProfileFormData {
   name: string;
   bio: string;
@@ -23,12 +23,15 @@ interface ProfileFormData {
   contributionWallet: string;
 }
 
-// Define the component props
 interface ProfileFormProps {
   onSubmit: (data: any) => void;
   isSubmitting: boolean;
   initialData?: Partial<ProfileFormData>;
 }
+
+const PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY;
+const PINATA_SECRET_API_KEY = process.env.NEXT_PUBLIC_PINATA_SECRET_API_KEY;
+const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT;
 
 export default function ProfileForm({
   onSubmit,
@@ -51,6 +54,9 @@ export default function ProfileForm({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  console.log("Inside the ProfileForm component");
 
   // Handle input changes
   const handleInputChange = (
@@ -111,6 +117,69 @@ export default function ProfileForm({
         delete newErrors.profilePicture;
         return newErrors;
       });
+    }
+  };
+
+  const uploadToIPFS = async (file: File): Promise<string> => {
+    try {
+      setIsUploading(true);
+      setUploadProgress(10);
+
+      // Create form data
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Optional metadata
+      const metadata = JSON.stringify({
+        name: `profile-picture-${Date.now()}`,
+      });
+      formData.append("pinataMetadata", metadata);
+
+      // Optional pinata options
+      const options = JSON.stringify({
+        cidVersion: 0,
+      });
+      formData.append("pinataOptions", options);
+
+      setUploadProgress(30);
+
+      // Upload to Pinata
+      const res = await axios.post(
+        "https://api.pinata.cloud/pinning/pinFileToIPFS",
+        formData,
+        {
+          headers: {
+            "Content-Type": `multipart/form-data;`,
+            // Use JWT if available, otherwise use API key and secret
+            ...(PINATA_JWT
+              ? { Authorization: `Bearer ${PINATA_JWT}` }
+              : {
+                  pinata_api_key: PINATA_API_KEY,
+                  pinata_secret_api_key: PINATA_SECRET_API_KEY,
+                }),
+          },
+          onUploadProgress: (progressEvent: any) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 60) / progressEvent.total
+            );
+            setUploadProgress(30 + percentCompleted); // Scale to 30-90%
+          },
+        }
+      );
+
+      setUploadProgress(90);
+
+      // Create IPFS URL using the returned CID
+      const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`;
+      console.log("File uploaded to IPFS via Pinata:", ipfsUrl);
+
+      setUploadProgress(100);
+      return ipfsUrl;
+    } catch (error) {
+      console.error("Error uploading file to Pinata:", error);
+      throw new Error("Failed to upload image to IPFS via Pinata");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -230,28 +299,36 @@ export default function ProfileForm({
     try {
       setIsUploading(true);
 
-      // In a real implementation, you would upload the profile picture to IPFS here
-      // and get back the IPFS hash to store in the blockchain
+      // Upload profile picture to IPFS if present
+      let profilePictureUrl = formData.profilePicturePreview;
 
-      // Mock upload delay
       if (formData.profilePicture) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+          profilePictureUrl = await uploadToIPFS(formData.profilePicture);
+        } catch (error) {
+          console.error("Error uploading profile picture to IPFS:", error);
+          setErrors((prev) => ({
+            ...prev,
+            form: "Failed to upload profile picture to IPFS. Please try again.",
+          }));
+          setIsUploading(false);
+          return;
+        }
       }
 
       // Prepare data for submission
-      // In a real implementation, you would include the IPFS hash for the profile picture
       const submissionData = {
         ...formData,
-        profilePictureUrl: formData.profilePicturePreview, // In a real app, this would be the IPFS URL
+        profilePicturePreview: profilePictureUrl, // Use the IPFS URL
       };
 
       // Submit the form data
       onSubmit(submissionData);
     } catch (error) {
-      console.error("Error uploading profile picture:", error);
+      console.error("Error during form submission:", error);
       setErrors((prev) => ({
         ...prev,
-        form: "Failed to upload profile picture. Please try again.",
+        form: "An error occurred during submission. Please try again.",
       }));
     } finally {
       setIsUploading(false);
@@ -315,6 +392,7 @@ export default function ProfileForm({
                     hover:file:bg-blue-100 hover:file:text-blue-800
                     transition cursor-pointer"
                   onChange={handleProfilePictureChange}
+                  disabled={isUploading}
                 />
               </label>
               <p className="mt-1 text-sm text-gray-500">
@@ -324,6 +402,23 @@ export default function ProfileForm({
                 <p className="mt-1 text-sm text-red-600">
                   {errors.profilePicture}
                 </p>
+              )}
+
+              {/* Upload progress indicator */}
+              {isUploading && (
+                <div className="mt-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div
+                      className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {uploadProgress < 100
+                      ? `Uploading: ${uploadProgress}%`
+                      : "Upload complete!"}
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -370,7 +465,7 @@ export default function ProfileForm({
             onChange={handleInputChange}
             rows={4}
             placeholder="Tell us about yourself and your work"
-            className={`w-full px-4 py-3 rounded-lg bg-white border ${
+            className={`w-full px-4 py-3 rounded-lg bg-white border font-black ${
               errors.bio
                 ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
