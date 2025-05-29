@@ -44,7 +44,7 @@ export default function WalletConnection() {
           : "Connect Wallet"}
       </Button>
       {authenticated && balance && (
-        <span className="text-xs px-2 py-1 bg-green-800 rounded-md">
+        <span className="text-xs px-2 py-1 text-white bg-pink-600 rounded-md">
           {parseFloat(balance.formatted).toFixed(4)} {balance.symbol}
         </span>
       )}

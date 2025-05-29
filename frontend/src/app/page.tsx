@@ -137,7 +137,7 @@ export default function LandingPage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-2 border-slate-300 hover:bg-slate-50 hover:border-blue-300 text-slate-700 px-8 py-6 text-lg font-semibold transition-all duration-300"
+                    className="border-2 border-slate-300 hover:bg-slate-50 hover:border-blue-300 bg-slate-100 text-slate-700 px-8 py-6 text-lg font-semibold transition-all duration-300"
                   >
                     Explore Developers
                   </Button>
@@ -221,7 +221,7 @@ export default function LandingPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-slate-300 hover:bg-slate-50 text-slate-700 font-medium"
+                        className="border-slate-300 hover:bg-slate-50 bg-slate-100 text-slate-700 font-medium"
                       >
                         <Github className="w-4 h-4 mr-2" />
                         GitHub
@@ -723,7 +723,7 @@ export default function LandingPage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="border-2 border-slate-300 hover:bg-slate-50 hover:border-blue-300 text-slate-700 px-8 py-6 text-lg font-semibold transition-all duration-300"
+                      className="border-2 border-slate-300 hover:bg-slate-50 bg-slate-100 hover:border-blue-300 text-slate-700 px-8 py-6 text-lg font-semibold transition-all duration-300"
                     >
                       Learn More
                     </Button>
@@ -741,11 +741,14 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
             <div className="col-span-2 lg:col-span-2">
               <Link href="/" className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg">
-                  <span className="font-bold text-white text-lg">C</span>
-                </div>
-                <span className="font-bold text-2xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                  ChainBento
+                <span className="font-bold">
+                  <Image
+                    src={logo}
+                    alt="ChainBento Logo"
+                    width={60}
+                    height={15}
+                    priority
+                  />
                 </span>
               </Link>
               <p className="text-slate-600 mb-4">
