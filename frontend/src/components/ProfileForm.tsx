@@ -1,6 +1,7 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import axios, { AxiosProgressEvent } from "axios";
+import { SignInButton, useProfile } from "@farcaster/auth-kit";
 
 // Define types
 interface Work {
@@ -21,6 +22,8 @@ interface ProfileFormData {
   profilePicturePreview: string;
   works: Work[];
   contributionWallet: string;
+  farcasterFid?: number;
+  farcasterCustody?: string;
 }
 
 interface ProfileFormProps {
@@ -50,13 +53,30 @@ export default function ProfileForm({
     profilePicturePreview: initialData?.profilePicturePreview || "",
     works: initialData?.works || [{ title: "", description: "", url: "" }], // Initialize with a single empty work
     contributionWallet: initialData?.contributionWallet || "",
+    farcasterFid: initialData?.farcasterFid,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  console.log("Inside the ProfileForm component");
+  // Get Farcaster profile data
+  const farcasterProfile = useProfile();
+  const { isAuthenticated, profile } = farcasterProfile;
+
+  console.log("Farcaster Profile:", profile);
+
+  // Effect to update form with Farcaster data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && profile) {
+      setFormData((prev) => ({
+        ...prev,
+        farcaster: `https://farcaster.xyz/${profile.username}`,
+        farcasterFid: profile.fid,
+        farcasterCustody: profile.custody,
+      }));
+    }
+  }, [isAuthenticated, profile]);
 
   // Handle input changes
   const handleInputChange = (
@@ -73,6 +93,20 @@ export default function ProfileForm({
         return newErrors;
       });
     }
+  };
+
+  // Disconnect Farcaster account
+  const disconnectFarcaster = () => {
+    setFormData((prev) => ({
+      ...prev,
+      farcaster: "",
+      farcasterFid: undefined,
+      farcasterCustody: undefined,
+    }));
+
+    // Note: The Auth Kit doesn't provide a direct logout method
+    // For a complete solution, you would need to clear the authentication state
+    // This might require refreshing the page or using a custom solution
   };
 
   // Handle profile picture upload
@@ -219,83 +253,9 @@ export default function ProfileForm({
     });
   };
 
-  // Validate form data
-  // const validateForm = () => {
-  //   const newErrors: Record<string, string> = {};
-
-  //   // Required fields
-  //   if (!formData.name.trim()) {
-  //     newErrors.name = "Name is required";
-  //   }
-
-  //   if (!formData.bio.trim()) {
-  //     newErrors.bio = "Bio is required";
-  //   } else if (formData.bio.length > 500) {
-  //     newErrors.bio = "Bio must be less than 500 characters";
-  //   }
-
-  //   // URL validations
-  //   const urlRegex =
-  //     /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
-
-  //   if (formData.github && !urlRegex.test(formData.github)) {
-  //     newErrors.github = "Please enter a valid URL";
-  //   }
-
-  //   if (formData.twitter && !urlRegex.test(formData.twitter)) {
-  //     newErrors.twitter = "Please enter a valid URL";
-  //   }
-
-  //   if (formData.farcaster && !urlRegex.test(formData.farcaster)) {
-  //     newErrors.farcaster = "Please enter a valid URL";
-  //   }
-
-  //   if (formData.lens && !urlRegex.test(formData.lens)) {
-  //     newErrors.lens = "Please enter a valid URL";
-  //   }
-
-  //   if (formData.blog && !urlRegex.test(formData.blog)) {
-  //     newErrors.blog = "Please enter a valid URL";
-  //   }
-
-  //   // Wallet address validation
-  //   if (formData.contributionWallet) {
-  //     const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
-  //     if (!ethAddressRegex.test(formData.contributionWallet)) {
-  //       newErrors.contributionWallet = "Please enter a valid Ethereum address";
-  //     }
-  //   }
-
-  //   // Project validations
-  //   const workErrors: Record<string, string> = {};
-  //   formData.works.forEach((work, index) => {
-  //     if (work.title.trim() && !work.url.trim()) {
-  //       workErrors[`work_${index}_url`] = "URL is required for each work";
-  //     }
-
-  //     if (work.url) {
-  //       const urlRegex =
-  //         /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
-  //       if (!urlRegex.test(work.url)) {
-  //         workErrors[`work_${index}_url`] = "Please enter a valid URL";
-  //       }
-  //     }
-  //   });
-
-  //   setErrors({ ...newErrors, ...workErrors });
-  //   return (
-  //     Object.keys(newErrors).length === 0 &&
-  //     Object.keys(workErrors).length === 0
-  //   );
-  // };
-
   // Handle form submission
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    // if (!validateForm()) {
-    //   return;
-    // }
 
     try {
       setIsUploading(true);
@@ -575,39 +535,68 @@ export default function ProfileForm({
           </div>
 
           {/* Farcaster */}
+
           <div>
             <label
               htmlFor="farcaster"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Farcaster URL
+              Farcaster
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg
-                  className="h-5 w-5 text-gray-400"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M11.9998 0C18.6274 0 24.0001 5.37267 24.0001 12.0003C24.0001 18.6279 18.6274 24.0006 11.9998 24.0006C5.37224 24.0006 -0.000244141 18.6279 -0.000244141 12.0003C-0.000244141 5.37267 5.37224 0 11.9998 0ZM14.8254 5.40698C13.0784 4.5033 10.92 4.5033 9.17225 5.40698L7.53867 6.25033C5.7917 7.15401 4.6665 8.90099 4.6665 10.83V13.17C4.6665 15.099 5.7917 16.846 7.53867 17.75L9.17225 18.593C10.92 19.4967 13.0784 19.4967 14.8254 18.593L16.459 17.75C18.2067 16.846 19.3322 15.099 19.3322 13.17V10.83C19.3322 8.90099 18.2067 7.15401 16.459 6.25033L14.8254 5.40698Z" />
-                </svg>
-              </div>
+            <div className="flex items-center space-x-2">
+              {!isAuthenticated && (
+                <div className="flex-grow flex items-center">
+                  <div className="mr-3">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M11.9998 0C18.6274 0 24.0001 5.37267 24.0001 12.0003C24.0001 18.6279 18.6274 24.0006 11.9998 24.0006C5.37224 24.0006 -0.000244141 18.6279 -0.000244141 12.0003C-0.000244141 5.37267 5.37224 0 11.9998 0ZM14.8254 5.40698C13.0784 4.5033 10.92 4.5033 9.17225 5.40698L7.53867 6.25033C5.7917 7.15401 4.6665 8.90099 4.6665 10.83V13.17C4.6665 15.099 5.7917 16.846 7.53867 17.75L9.17225 18.593C10.92 19.4967 13.0784 19.4967 14.8254 18.593L16.459 17.75C18.2067 16.846 19.3322 15.099 19.3322 13.17V10.83C19.3322 8.90099 18.2067 7.15401 16.459 6.25033L14.8254 5.40698Z" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-500">
+                    Connect your Farcaster account
+                  </span>
+                </div>
+              )}
+
+              {/* Hidden input to store the Farcaster URL value */}
               <input
-                type="url"
+                type="hidden"
                 id="farcaster"
                 name="farcaster"
                 value={formData.farcaster}
-                onChange={handleInputChange}
-                placeholder="https://farcaster.xyz/u/yourusername"
-                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
-                  errors.farcaster
-                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                } focus:outline-none focus:ring-2 focus:ring-opacity-50`}
               />
+
+              <div className="flex-shrink-0">
+                <div className="bg-purple-50 text-purple-700 px-4 py-2 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors font-medium text-sm flex items-center cursor-pointer">
+                  <SignInButton onSignOut={disconnectFarcaster} />
+                </div>
+              </div>
             </div>
+
             {errors.farcaster && (
               <p className="mt-1 text-sm text-red-600">{errors.farcaster}</p>
+            )}
+
+            {isAuthenticated && profile && (
+              <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-100">
+                <p className="text-sm text-green-600 flex items-center">
+                  <svg
+                    className="h-4 w-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Connected as @{profile.displayName} (FID: {profile.fid})
+                </p>
+              </div>
             )}
           </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProfileForm from "@/components/ProfileForm";
@@ -60,6 +60,13 @@ export default function CreateProfilePage() {
   // const [createdProfile, setCreatedProfile] = useState<CreatedProfile | null>(
   //   null
   // );
+
+  useEffect(() => {
+    // If the user is authenticated, skip the connect step
+    if (authenticated) {
+      setStep("form");
+    }
+  }, [authenticated]);
 
   // Handle form submission
   const handleSubmit = async (formData: ProfileFormData) => {
