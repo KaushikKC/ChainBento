@@ -1,11 +1,6 @@
 import { chainArray, transportsObject } from "./chains";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import {
-  injectedWallet,
-  metaMaskWallet,
-  rainbowWallet,
-  walletConnectWallet,
-} from "@rainbow-me/rainbowkit/wallets";
+import { metaMaskWallet, rainbowWallet } from "@rainbow-me/rainbowkit/wallets";
 import { createConfig } from "wagmi";
 
 const projectId = process.env.NEXT_PUBLIC_RAINBOW_KET_ID;
