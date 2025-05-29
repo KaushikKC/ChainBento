@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import Image from "next/image";
-import axios from "axios";
+import axios, { AxiosProgressEvent } from "axios";
 
 // Define types
 interface Work {
@@ -24,7 +24,7 @@ interface ProfileFormData {
 }
 
 interface ProfileFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: ProfileFormData) => void; // Changed from any to ProfileFormData
   isSubmitting: boolean;
   initialData?: Partial<ProfileFormData>;
 }
@@ -158,9 +158,10 @@ export default function ProfileForm({
                   pinata_secret_api_key: PINATA_SECRET_API_KEY,
                 }),
           },
-          onUploadProgress: (progressEvent: any) => {
+          onUploadProgress: (progressEvent: AxiosProgressEvent) => {
             const percentCompleted = Math.round(
-              (progressEvent.loaded * 60) / progressEvent.total
+              (progressEvent.loaded * 60) /
+                (progressEvent.total || progressEvent.loaded)
             );
             setUploadProgress(30 + percentCompleted); // Scale to 30-90%
           },
@@ -219,74 +220,74 @@ export default function ProfileForm({
   };
 
   // Validate form data
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  // const validateForm = () => {
+  //   const newErrors: Record<string, string> = {};
 
-    // Required fields
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
+  //   // Required fields
+  //   if (!formData.name.trim()) {
+  //     newErrors.name = "Name is required";
+  //   }
 
-    if (!formData.bio.trim()) {
-      newErrors.bio = "Bio is required";
-    } else if (formData.bio.length > 500) {
-      newErrors.bio = "Bio must be less than 500 characters";
-    }
+  //   if (!formData.bio.trim()) {
+  //     newErrors.bio = "Bio is required";
+  //   } else if (formData.bio.length > 500) {
+  //     newErrors.bio = "Bio must be less than 500 characters";
+  //   }
 
-    // URL validations
-    const urlRegex =
-      /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+  //   // URL validations
+  //   const urlRegex =
+  //     /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
-    if (formData.github && !urlRegex.test(formData.github)) {
-      newErrors.github = "Please enter a valid URL";
-    }
+  //   if (formData.github && !urlRegex.test(formData.github)) {
+  //     newErrors.github = "Please enter a valid URL";
+  //   }
 
-    if (formData.twitter && !urlRegex.test(formData.twitter)) {
-      newErrors.twitter = "Please enter a valid URL";
-    }
+  //   if (formData.twitter && !urlRegex.test(formData.twitter)) {
+  //     newErrors.twitter = "Please enter a valid URL";
+  //   }
 
-    if (formData.farcaster && !urlRegex.test(formData.farcaster)) {
-      newErrors.farcaster = "Please enter a valid URL";
-    }
+  //   if (formData.farcaster && !urlRegex.test(formData.farcaster)) {
+  //     newErrors.farcaster = "Please enter a valid URL";
+  //   }
 
-    if (formData.lens && !urlRegex.test(formData.lens)) {
-      newErrors.lens = "Please enter a valid URL";
-    }
+  //   if (formData.lens && !urlRegex.test(formData.lens)) {
+  //     newErrors.lens = "Please enter a valid URL";
+  //   }
 
-    if (formData.blog && !urlRegex.test(formData.blog)) {
-      newErrors.blog = "Please enter a valid URL";
-    }
+  //   if (formData.blog && !urlRegex.test(formData.blog)) {
+  //     newErrors.blog = "Please enter a valid URL";
+  //   }
 
-    // Wallet address validation
-    if (formData.contributionWallet) {
-      const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
-      if (!ethAddressRegex.test(formData.contributionWallet)) {
-        newErrors.contributionWallet = "Please enter a valid Ethereum address";
-      }
-    }
+  //   // Wallet address validation
+  //   if (formData.contributionWallet) {
+  //     const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
+  //     if (!ethAddressRegex.test(formData.contributionWallet)) {
+  //       newErrors.contributionWallet = "Please enter a valid Ethereum address";
+  //     }
+  //   }
 
-    // Project validations
-    const workErrors: Record<string, string> = {};
-    formData.works.forEach((work, index) => {
-      if (work.title.trim() && !work.url.trim()) {
-        workErrors[`work_${index}_url`] = "URL is required for each work";
-      }
+  //   // Project validations
+  //   const workErrors: Record<string, string> = {};
+  //   formData.works.forEach((work, index) => {
+  //     if (work.title.trim() && !work.url.trim()) {
+  //       workErrors[`work_${index}_url`] = "URL is required for each work";
+  //     }
 
-      if (work.url) {
-        const urlRegex =
-          /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
-        if (!urlRegex.test(work.url)) {
-          workErrors[`work_${index}_url`] = "Please enter a valid URL";
-        }
-      }
-    });
+  //     if (work.url) {
+  //       const urlRegex =
+  //         /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+  //       if (!urlRegex.test(work.url)) {
+  //         workErrors[`work_${index}_url`] = "Please enter a valid URL";
+  //       }
+  //     }
+  //   });
 
-    setErrors({ ...newErrors, ...workErrors });
-    return (
-      Object.keys(newErrors).length === 0 &&
-      Object.keys(workErrors).length === 0
-    );
-  };
+  //   setErrors({ ...newErrors, ...workErrors });
+  //   return (
+  //     Object.keys(newErrors).length === 0 &&
+  //     Object.keys(workErrors).length === 0
+  //   );
+  // };
 
   // Handle form submission
   const handleSubmit = async (e: FormEvent) => {

@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import ProfileCard from "@/components/ProfileCard";
+import { useParams } from "next/navigation";
 import SupportModal from "@/components/SupportModal";
 import WalletConnection from "@/components/WalletConnection";
 import { useAccount } from "wagmi";
@@ -137,7 +136,7 @@ const DraggableProject = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.PROJECT,
-    hover(item: { id: string; index: number }, monitor) {
+    hover(item: { id: string; index: number }) {
       if (!ref.current) {
         return;
       }
@@ -391,7 +390,6 @@ const EditableField = ({
 
 export default function ProfilePage() {
   const { address } = useParams();
-  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [originalProfile, setOriginalProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -512,7 +510,7 @@ export default function ProfilePage() {
         setOriginalProfile(JSON.parse(JSON.stringify(mappedProfile))); // Deep copy for comparison
 
         // Log a profile visit (in a real app, you might want to do this only once per session)
-        logProfileVisit(profileAddress);
+        logProfileVisit(profileAddress || "");
       } catch (err) {
         console.error("Failed to fetch profile:", err);
         setError("Failed to load profile data. Please try again later.");
@@ -632,7 +630,7 @@ export default function ProfilePage() {
 
       // Move to success step
       setStep("success");
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error("Error minting profile NFT:", err);
       // Even if there's an error, if we have a transaction hash, it might have still succeeded
       if (txHash) {
@@ -666,13 +664,19 @@ export default function ProfilePage() {
             "There was an issue confirming your transaction, but it may have succeeded. Check your wallet for confirmation."
           );
           setStep("success");
-        } catch (finalErr) {
+        } catch {
+          // Using catch without defining a variable avoids the unused variable warning
           setMintError(
             "Error minting NFT, but transaction was sent. Please check your wallet and try refreshing the page."
           );
         }
       } else {
-        setMintError(err.message || "Failed to mint NFT. Please try again.");
+        // Properly type check err to extract message safely
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to mint NFT. Please try again.";
+        setMintError(errorMessage);
       }
     } finally {
       setIsSubmitting(false);
@@ -1884,6 +1888,7 @@ export default function ProfilePage() {
         {isSupportModalOpen && (
           <SupportModal
             isOpen={isSupportModalOpen}
+            profileName={profile.name}
             profileAddress={profileAddress!}
             contributionWallet={profile.contributionWallet || profileAddress!}
             onClose={() => setSupportModalOpen(false)}

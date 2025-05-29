@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useDataContext } from "@/context/DataContext";
 import { usePrivy } from "@privy-io/react-auth";
 import { useAccount } from "wagmi";
-import { ethers, Contract } from "ethers";
+import { ethers } from "ethers";
 
 // Constants that would typically come from environment variables
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -30,15 +30,17 @@ interface Token {
 interface SupportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  profileName: string;
+  profileName?: string; // Make this optional since it appears to be missing in the usage
   profileAddress: string;
+  contributionWallet: string; // Add the missing prop
 }
 
 export default function SupportModal({
   isOpen,
   onClose,
-  profileName,
+  profileName = "Developer", // Add default value since it might be missing
   profileAddress,
+  contributionWallet,
 }: SupportModalProps) {
   const [step, setStep] = useState<
     "amount" | "message" | "confirming" | "success" | "error"
@@ -118,7 +120,7 @@ export default function SupportModal({
       console.log(`Supporting ${recipient} with ${amount} ETH...`);
 
       // Call the support function with value
-      const transaction = await contract.support(recipient, {
+      const transaction = await contract.support(contributionWallet, {
         value: amountInWei,
       });
 
@@ -149,9 +151,13 @@ export default function SupportModal({
 
       setStep("success");
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error supporting developer:", err);
-      setError(err.message || "Failed to support. Please try again.");
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to support. Please try again.";
+      setError(errorMessage);
       setStep("error");
       return false;
     } finally {
@@ -208,11 +214,13 @@ export default function SupportModal({
 
         // Note: handleDirectSupport will handle setting the step and error states
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error processing support transaction:", err);
-      setError(
-        err.message || "Failed to process transaction. Please try again."
-      );
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to process transaction. Please try again.";
+      setError(errorMessage);
       setStep("error");
     } finally {
       setIsSubmitting(false);
@@ -332,7 +340,8 @@ export default function SupportModal({
                 {step === "amount" && (
                   <div className="space-y-5">
                     <p className="text-sm text-gray-600 text-center bg-blue-50 p-3 rounded-lg">
-                      Choose a token and amount to support {profileName}'s work
+                      Choose a token and amount to support {profileName}&apos;s
+                      work
                     </p>
 
                     {/* Token Selection */}
@@ -543,7 +552,7 @@ export default function SupportModal({
                     {message && (
                       <div className="mt-4 w-full bg-gray-50 rounded-lg p-4 border border-gray-200">
                         <p className="text-sm text-gray-700 italic">
-                          "{message}"
+                          &quot;{message}&quot;
                         </p>
                       </div>
                     )}

@@ -22,6 +22,29 @@ const steps = [
   },
 ];
 
+interface ProfileFormData {
+  name: string;
+  bio: string;
+  profilePicturePreview?: string;
+  github?: string;
+  twitter?: string;
+  farcaster?: string;
+  lens?: string;
+  blog?: string;
+  works?: Array<{
+    title: string;
+    description: string;
+    url: string;
+  }>;
+  contributionWallet?: string;
+}
+
+interface CreatedProfile extends ProfileFormData {
+  wallet: string;
+  txHash?: string;
+  profileNftTokenId?: number;
+}
+
 export default function CreateProfilePage() {
   const router = useRouter();
   const { address } = useAccount();
@@ -34,10 +57,12 @@ export default function CreateProfilePage() {
   );
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [profileData, setProfileData] = useState<any>(null);
+  // const [createdProfile, setCreatedProfile] = useState<CreatedProfile | null>(
+  //   null
+  // );
 
   // Handle form submission
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: ProfileFormData) => {
     if (!address) {
       setError("Please connect your wallet first");
       return;
@@ -48,11 +73,14 @@ export default function CreateProfilePage() {
 
     try {
       // Prepare the profile data for the API
-      const profileSubmission = {
+      const profileSubmission: Omit<
+        CreatedProfile,
+        "txHash" | "profileNftTokenId"
+      > = {
         wallet: address,
         name: formData.name,
         bio: formData.bio,
-        profilePictureUrl: formData.profilePicturePreview,
+        profilePicturePreview: formData.profilePicturePreview, // Changed from profilePictureUrl to match the interface
         github: formData.github,
         twitter: formData.twitter,
         farcaster: formData.farcaster,
@@ -78,26 +106,33 @@ export default function CreateProfilePage() {
         throw new Error(errorData.error || "Failed to create profile");
       }
 
-      const createdProfile = await response.json();
-      console.log("Profile created successfully:", createdProfile);
+      const responseData = await response.json();
+      const createdProfileData = responseData as CreatedProfile;
+      console.log("Profile created successfully:", createdProfileData);
 
-      // Store the profile data for the next step
-      setProfileData(createdProfile);
+      // Store the profile data for the next step (if needed)
+      // setCreatedProfile(createdProfileData);
 
       // Move to NFT minting step
       setStep("minting");
 
       // If there's a transaction hash in the response
-      if (createdProfile?.txHash) {
-        setTxHash(createdProfile.txHash);
+      if (createdProfileData?.txHash) {
+        setTxHash(createdProfileData.txHash);
         // Redirect to profile page after successful submission
         setTimeout(() => {
           router.push(`/profile/${address}`);
         }, 3000);
       }
-    } catch (err: any) {
-      console.error("Error creating profile:", err);
-      setError(err.message || "Failed to create profile. Please try again.");
+    } catch (error: unknown) {
+      console.error("Error creating profile:", error);
+
+      // Handle different error types properly
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Failed to create profile. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

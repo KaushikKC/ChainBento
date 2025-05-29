@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -248,7 +247,7 @@ export default function LandingPage() {
                 ✨ Features
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                One Profile to Showcase Everything You've Built.
+                One Profile to Showcase Everything You&apos;ve Built.
               </h2>
               <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
                 ChainBento brings together your entire developer journey in one
@@ -385,8 +384,8 @@ export default function LandingPage() {
                         Powered by ENS, IPFS, and Ethereum
                       </h3>
                       <p className="text-slate-600 leading-relaxed">
-                        Built on battle-tested Web3 infrastructure that's here
-                        to stay.
+                        Built on battle-tested Web3 infrastructure that&apos;s
+                        here to stay.
                       </p>
                     </div>
                   </div>
@@ -440,7 +439,7 @@ export default function LandingPage() {
                 👥 Community
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                See Who's Building in Public
+                See Who&apos;s Building in Public
               </h2>
               <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
                 Join a growing community of developers showcasing their work and
