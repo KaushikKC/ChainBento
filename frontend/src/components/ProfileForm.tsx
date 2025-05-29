@@ -19,7 +19,7 @@ interface ProfileFormData {
   lens: string;
   blog: string;
   profilePicture: File | null;
-  profilePicturePreview: string;
+  profilePictureUrl: string;
   works: Work[];
   contributionWallet: string;
   farcasterFid?: number;
@@ -50,7 +50,7 @@ export default function ProfileForm({
     lens: initialData?.lens || "",
     blog: initialData?.blog || "",
     profilePicture: null,
-    profilePicturePreview: initialData?.profilePicturePreview || "",
+    profilePictureUrl: initialData?.profilePictureUrl || "",
     works: initialData?.works || [{ title: "", description: "", url: "" }], // Initialize with a single empty work
     contributionWallet: initialData?.contributionWallet || "",
     farcasterFid: initialData?.farcasterFid,
@@ -139,7 +139,7 @@ export default function ProfileForm({
       setFormData((prev) => ({
         ...prev,
         profilePicture: file,
-        profilePicturePreview: reader.result as string,
+        profilePictureUrl: reader.result as string,
       }));
     };
     reader.readAsDataURL(file);
@@ -261,7 +261,7 @@ export default function ProfileForm({
       setIsUploading(true);
 
       // Upload profile picture to IPFS if present
-      let profilePictureUrl = formData.profilePicturePreview;
+      let profilePictureUrl = formData.profilePictureUrl;
 
       if (formData.profilePicture) {
         try {
@@ -280,7 +280,7 @@ export default function ProfileForm({
       // Prepare data for submission
       const submissionData = {
         ...formData,
-        profilePicturePreview: profilePictureUrl, // Use the IPFS URL
+        profilePictureUrl: profilePictureUrl, // Use the IPFS URL
       };
 
       // Submit the form data
@@ -320,9 +320,9 @@ export default function ProfileForm({
           <div className="flex items-center space-x-6">
             <div className="flex-shrink-0">
               <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-md flex items-center justify-center">
-                {formData.profilePicturePreview ? (
+                {formData.profilePictureUrl ? (
                   <Image
-                    src={formData.profilePicturePreview}
+                    src={formData.profilePictureUrl}
                     alt="Profile preview"
                     fill
                     className="object-cover"
@@ -400,7 +400,7 @@ export default function ProfileForm({
             value={formData.name}
             onChange={handleInputChange}
             placeholder="Your name"
-            className={`w-full px-4 py-3 rounded-lg bg-white border ${
+            className={`w-full px-4 py-3 rounded-lg bg-white border text-black ${
               errors.name
                 ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -426,7 +426,7 @@ export default function ProfileForm({
             onChange={handleInputChange}
             rows={4}
             placeholder="Tell us about yourself and your work"
-            className={`w-full px-4 py-3 rounded-lg bg-white border font-black ${
+            className={`w-full px-4 py-3 rounded-lg bg-white border text-black ${
               errors.bio
                 ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -485,7 +485,7 @@ export default function ProfileForm({
                 value={formData.github}
                 onChange={handleInputChange}
                 placeholder="https://github.com/yourusername"
-                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm text-black ${
                   errors.github
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -522,7 +522,7 @@ export default function ProfileForm({
                 value={formData.twitter}
                 onChange={handleInputChange}
                 placeholder="https://twitter.com/yourusername"
-                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm text-black ${
                   errors.twitter
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -625,7 +625,7 @@ export default function ProfileForm({
                 value={formData.lens}
                 onChange={handleInputChange}
                 placeholder="https://lens.xyz/yourusername"
-                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm text-black ${
                   errors.lens
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -668,7 +668,7 @@ export default function ProfileForm({
                 value={formData.blog}
                 onChange={handleInputChange}
                 placeholder="https://yourblog.com"
-                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm text-black ${
                   errors.blog
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -771,7 +771,7 @@ export default function ProfileForm({
                   handleWorkChange(index, "title", e.target.value)
                 }
                 placeholder="Title of your work"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
               />
             </div>
 
@@ -791,7 +791,7 @@ export default function ProfileForm({
                 }
                 rows={2}
                 placeholder="Brief description of your work"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
               />
             </div>
 
@@ -827,7 +827,7 @@ export default function ProfileForm({
                     handleWorkChange(index, "url", e.target.value)
                   }
                   placeholder="https://example.com/your-work"
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg bg-white shadow-sm ${
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg text-black bg-white shadow-sm ${
                     errors[`work_${index}_url`]
                       ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                       : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -845,7 +845,7 @@ export default function ProfileForm({
       </div>
 
       {/* Contribution Wallet */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <h2 className="text-xl font-semibold text-gray-800 pb-2 border-b border-gray-200">
           Contribution Wallet
         </h2>
@@ -897,7 +897,7 @@ export default function ProfileForm({
             </p>
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Submit Button */}
       <div className="flex justify-end pt-8">

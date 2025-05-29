@@ -33,6 +33,7 @@ const userProfileSchema = new mongoose.Schema({
   bio: String,
   avatar: String,
   farcaster: String,
+  farcasterID: String, // Added ForecastID field to store Farcaster ID
   github: String,
   twitter: String,
   lens: String, // Added lens field
@@ -186,14 +187,15 @@ app.post("/api/profile", async (req, res) => {
       wallet,
       name,
       bio,
-      profilePictureUrl, // Changed from avatar to profilePictureUrl to match frontend
+      profilePictureUrl,
       farcaster,
+      farcasterID,
       github,
       twitter,
-      lens, // Added lens field
+      lens,
       blog,
-      works, // Changed from projects to works
-      contributionWallet, // Added contribution wallet
+      works,
+      contributionWallet,
     } = req.body;
 
     if (!ethers.isAddress(wallet)) {
@@ -204,13 +206,14 @@ app.post("/api/profile", async (req, res) => {
       wallet: ethers.getAddress(wallet),
       name,
       bio,
-      profilePictureUrl, // Changed from avatar to profilePictureUrl
+      profilePictureUrl,
       farcaster,
+      farcasterID,
       github,
       twitter,
       lens,
       blog,
-      works, // Added works array
+      works,
       contributionWallet,
       lastUpdated: new Date(),
     };
@@ -284,6 +287,7 @@ app.put("/api/profile/:address", async (req, res) => {
       bio,
       profilePictureUrl,
       farcaster,
+      farcasterID,
       github,
       twitter,
       lens,
@@ -311,6 +315,7 @@ app.put("/api/profile/:address", async (req, res) => {
       bio,
       profilePictureUrl,
       farcaster,
+      farcasterID,
       github,
       twitter,
       lens,

@@ -25,7 +25,7 @@ const steps = [
 interface ProfileFormData {
   name: string;
   bio: string;
-  profilePicturePreview?: string;
+  profilePictureUrl?: string;
   github?: string;
   twitter?: string;
   farcaster?: string;
@@ -87,7 +87,7 @@ export default function CreateProfilePage() {
         wallet: address,
         name: formData.name,
         bio: formData.bio,
-        profilePicturePreview: formData.profilePicturePreview, // Changed from profilePictureUrl to match the interface
+        profilePictureUrl: formData.profilePictureUrl, // Changed from profilePictureUrl to match the interface
         github: formData.github,
         twitter: formData.twitter,
         farcaster: formData.farcaster,
@@ -126,11 +126,12 @@ export default function CreateProfilePage() {
       // If there's a transaction hash in the response
       if (createdProfileData?.txHash) {
         setTxHash(createdProfileData.txHash);
-        // Redirect to profile page after successful submission
-        setTimeout(() => {
-          router.push(`/profile/${address}`);
-        }, 3000);
       }
+
+      // Redirect to profile page after successful submission
+      setTimeout(() => {
+        router.push(`/profile/${address}`);
+      }, 3000);
     } catch (error: unknown) {
       console.error("Error creating profile:", error);
 

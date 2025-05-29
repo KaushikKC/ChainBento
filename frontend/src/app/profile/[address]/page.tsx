@@ -14,6 +14,7 @@ import { TouchBackend } from "react-dnd-touch-backend";
 import { isTouchDevice } from "@/utils/device";
 import { useDataContext } from "@/context/DataContext";
 import logo from "../../assests/ChainBentoLogo.png";
+import { SignInButton, useProfile } from "@farcaster/auth-kit";
 
 // API base URL from environment variable or default to localhost
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -404,6 +405,11 @@ export default function ProfilePage() {
   const [step, setStep] = useState<"idle" | "confirming" | "success">("idle");
   const [mintError, setMintError] = useState<string | null>(null);
   const { getContractInstance } = useDataContext();
+  const farcasterProfile = useProfile();
+  const {
+    isAuthenticated: isFarcasterAuthenticated,
+    profile: farcasterProfileData,
+  } = farcasterProfile;
 
   const { address: userAddress } = useAccount();
   const { authenticated } = usePrivy();
@@ -462,6 +468,25 @@ export default function ProfilePage() {
       setError("Failed to load profile data. Please try again later.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isFarcasterAuthenticated && farcasterProfileData && isEditing) {
+      setProfile((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          farcaster: farcasterProfileData.username || prev.farcaster,
+        };
+      });
+    }
+  }, [isFarcasterAuthenticated, farcasterProfileData, isEditing]);
+
+  // Add this function to disconnect Farcaster
+  const disconnectFarcaster = () => {
+    if (profile) {
+      updateField("farcaster", "");
     }
   };
 
@@ -1465,11 +1490,20 @@ export default function ProfilePage() {
                           <div className="bg-purple-100 p-2 rounded-full">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5 text-purple-600"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
+                              className="h-5 w-5"
+                              viewBox="0 0 256 256"
+                              fill="none"
                             >
-                              <path d="M11 12h-9v-2h9V2h2v8h9v2h-9v10h-2z" />
+                              <rect
+                                width="256"
+                                height="256"
+                                rx="56"
+                                fill="#7C65C1"
+                              ></rect>
+                              <path
+                                d="M183.296 71.68H211.968L207.872 94.208H200.704V180.224L201.02 180.232C204.266 180.396 206.848 183.081 206.848 186.368V191.488L207.164 191.496C210.41 191.66 212.992 194.345 212.992 197.632V202.752H155.648V197.632C155.648 194.345 158.229 191.66 161.476 191.496L161.792 191.488V186.368C161.792 183.081 164.373 180.396 167.62 180.232L167.936 180.224V138.24C167.936 116.184 150.056 98.304 128 98.304C105.944 98.304 88.0638 116.184 88.0638 138.24V180.224L88.3798 180.232C91.6262 180.396 94.2078 183.081 94.2078 186.368V191.488L94.5238 191.496C97.7702 191.66 100.352 194.345 100.352 197.632V202.752H43.0078V197.632C43.0078 194.345 45.5894 191.66 48.8358 191.496L49.1518 191.488V186.368C49.1518 183.081 51.7334 180.396 54.9798 180.232L55.2958 180.224V94.208H48.1278L44.0318 71.68H72.7038V54.272H183.296V71.68Z"
+                                fill="white"
+                              ></path>
                             </svg>
                           </div>
                           <span className="font-medium text-gray-800">
@@ -1499,16 +1533,43 @@ export default function ProfilePage() {
                         )}
                       </div>
                       {isEditing ? (
-                        <EditableField
-                          value={profile.farcaster}
-                          onChange={(value) => updateField("farcaster", value)}
-                          isEditable={true}
-                          placeholder="Add your Farcaster handle"
-                          className="text-gray-700"
-                        />
+                        <div className="flex items-center space-x-2">
+                          {!isFarcasterAuthenticated ? (
+                            <div className="flex-grow bg-purple-50 p-2 rounded-lg">
+                              <SignInButton onSignOut={disconnectFarcaster} />
+                            </div>
+                          ) : (
+                            <div className="flex-grow">
+                              <div className="flex items-center gap-2">
+                                <EditableField
+                                  value={profile.farcaster}
+                                  onChange={(value) =>
+                                    updateField("farcaster", value)
+                                  }
+                                  isEditable={true}
+                                  placeholder="Add your Farcaster handle"
+                                  className="text-gray-700 flex-grow"
+                                />
+                                <button
+                                  onClick={disconnectFarcaster}
+                                  className="text-sm px-2 py-1 bg-gray-100 rounded-md text-gray-600 hover:bg-gray-200"
+                                >
+                                  Disconnect
+                                </button>
+                              </div>
+                              <div className="mt-2 p-2 bg-green-50 rounded-lg">
+                                <p className="text-xs text-green-600">
+                                  Connected as @{farcasterProfileData?.username}
+                                  {farcasterProfileData?.fid &&
+                                    `(FID: ${farcasterProfileData.fid})`}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       ) : profile.farcaster ? (
                         <a
-                          href={`https://warpcast.com/${profile.farcaster}`}
+                          href={`https://farcaster.xyz/${profile.farcaster}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-purple-600 hover:text-purple-800 transition-colors flex items-center gap-1 font-medium"
