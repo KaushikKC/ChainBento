@@ -27,6 +27,8 @@ import { Input } from "@/components/ui/input";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import WalletConnection from "@/components/WalletConnection";
+import Image from "next/image";
+import logo from "../app/assests/ChainBentoLogo.png";
 
 export default function LandingPage() {
   const { ready, authenticated } = usePrivy();
@@ -53,11 +55,14 @@ export default function LandingPage() {
       <header className="border-b border-slate-200/60 bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-sm">
         <div className="flex items-center justify-between h-20 px-6 md:px-8 max-w-7xl mx-auto">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg">
-              <span className="font-bold text-white text-lg">C</span>
-            </div>
-            <span className="font-bold text-2xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-              ChainBento
+            <span className="font-bold">
+              <Image
+                src={logo}
+                alt="ChainBento Logo"
+                width={60}
+                height={15}
+                priority
+              />
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8">

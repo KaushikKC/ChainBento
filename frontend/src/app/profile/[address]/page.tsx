@@ -13,6 +13,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { isTouchDevice } from "@/utils/device";
 import { useDataContext } from "@/context/DataContext";
+import logo from "../../assests/ChainBentoLogo.png";
 
 // API base URL from environment variable or default to localhost
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -878,11 +879,14 @@ export default function ProfilePage() {
         <header className="border-b border-gray-200 bg-white/80 backdrop-blur-md fixed top-0 w-full z-50 shadow-sm">
           <div className="flex items-center justify-between h-16 px-4 md:px-6">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                <span className="font-bold text-white">CB</span>
-              </div>
-              <span className="font-bold text-xl text-gray-800">
-                ChainBento
+              <span className="font-bold">
+                <Image
+                  src={logo}
+                  alt="ChainBento Logo"
+                  width={60}
+                  height={15}
+                  priority
+                />
               </span>
             </Link>
 

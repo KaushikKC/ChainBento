@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WalletConnection from "@/components/WalletConnection";
+import logo from "./../assests/ChainBentoLogo.png";
 
 interface Profile {
   address: string;
@@ -151,10 +152,15 @@ export default function ExplorePage() {
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-md fixed top-0 w-full z-50 shadow-sm">
         <div className="flex items-center justify-between h-16 px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-              <span className="font-bold text-white">CB</span>
-            </div>
-            <span className="font-bold text-xl text-gray-800">ChainBento</span>
+            <span className="font-bold">
+              <Image
+                src={logo}
+                alt="ChainBento Logo"
+                width={60}
+                height={15}
+                priority
+              />
+            </span>
           </Link>
 
           {/* WalletConnection Component */}
