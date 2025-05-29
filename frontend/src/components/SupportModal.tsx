@@ -7,6 +7,7 @@ import { useDataContext } from "@/context/DataContext";
 import { usePrivy } from "@privy-io/react-auth";
 import { useAccount } from "wagmi";
 import { ethers } from "ethers";
+import ethereum from "../app/assests/ethereum-eth-logo.png";
 
 // Constants that would typically come from environment variables
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -355,7 +356,7 @@ export default function SupportModal({
                             key={token.symbol}
                             type="button"
                             onClick={() => setSelectedToken(token)}
-                            className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all ${
+                            className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all text-black ${
                               selectedToken?.symbol === token.symbol
                                 ? "border-blue-500 bg-blue-50 shadow-sm"
                                 : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
@@ -367,7 +368,7 @@ export default function SupportModal({
                             disabled={token.symbol !== "ETH"} // Only enable ETH for now
                           >
                             <Image
-                              src={token.icon}
+                              src={ethereum}
                               alt={token.symbol}
                               width={32}
                               height={32}
@@ -399,7 +400,7 @@ export default function SupportModal({
                           type="number"
                           name="amount"
                           id="amount"
-                          className="block w-full pr-12 pl-4 py-3 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
+                          className="block w-full pr-12 pl-4 py-3 border-gray-300 rounded-lg text-black focus:ring-blue-500 focus:border-blue-500 bg-white"
                           placeholder="0.00"
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}

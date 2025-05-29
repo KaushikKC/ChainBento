@@ -1169,7 +1169,7 @@ export default function ProfilePage() {
                       rel="noopener noreferrer"
                       className="text-xs text-indigo-600 hover:text-indigo-800 mt-3 inline-flex items-center gap-1 font-medium"
                     >
-                      <span>View on Etherscan</span>
+                      <span>View on Basescan</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-3 w-3"
