@@ -1165,7 +1165,7 @@ export default function ProfilePage() {
                       Token ID: {profile.profileNftTokenId}
                     </div>
                     <a
-                      href={`https://sepolia.basescan.org/nft/0x1011b31fcb82e77c5eab85b8090c63c3e8670c52/${profile.profileNftTokenId}`}
+                      href={`https://sepolia.basescan.org/nft/0xcfd2821d1a334e4177731a471fcf27183526f9c8/${profile.profileNftTokenId}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-indigo-600 hover:text-indigo-800 mt-3 inline-flex items-center gap-1 font-medium"

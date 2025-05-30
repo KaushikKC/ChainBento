@@ -40,7 +40,7 @@ export default function LandingPage() {
 
     if (authenticated) {
       // User is authenticated, navigate to create page
-      router.push("/create");
+      router.push("/explore");
     } else {
       // User not authenticated, show wallet connection prompt
       alert("Please connect your wallet first to get started.");
