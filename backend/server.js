@@ -74,7 +74,11 @@ const contract = new ethers.Contract(
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://chain-bento.vercel.app/",
+    origin: "*", // Allow all origins
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    credentials: true,
+    maxAge: 86400, // 24 hours
   })
 );
 app.use(express.json());
