@@ -20,7 +20,8 @@ import { SignInButton, useProfile } from "@farcaster/auth-kit";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 // This would come from your environment variables in a real app
 const CONTRACT_ADDRESS =
-  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x123456789...";
+  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
+  "0xcfD2821D1A334E4177731a471fcF27183526f9C8";
 
 // Define the profile data interface to match the backend response
 interface ProfileData {

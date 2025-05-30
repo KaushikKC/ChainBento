@@ -13,7 +13,7 @@ import ethereum from "../app/assests/ethereum-eth-logo.png";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
-  "0x1011b31fcB82E77c5EAB85B8090c63C3E8670c52";
+  "0xcfD2821D1A334E4177731a471fcF27183526f9C8";
 
 // ABI for the support contract - this should be imported from a separate file in a real app
 const CONTRACT_ABI = [
