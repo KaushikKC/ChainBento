@@ -10,7 +10,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import { CheckCircleIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 
 // Define API base URL - replace with your actual API URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://chain-bento-backend.vercel.app";
 
 // Define steps for the creation process
 const steps = [

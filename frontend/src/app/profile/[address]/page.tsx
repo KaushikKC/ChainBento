@@ -17,7 +17,8 @@ import logo from "../../assests/ChainBentoLogo.png";
 import { SignInButton, useProfile } from "@farcaster/auth-kit";
 
 // API base URL from environment variable or default to localhost
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://chain-bento-backend.vercel.app";
 // This would come from your environment variables in a real app
 const CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||

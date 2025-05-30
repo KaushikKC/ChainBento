@@ -11,7 +11,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import logo from "./../assests/ChainBentoLogo.png";
 
 // API base URL from environment variable or default to localhost
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://chain-bento-backend.vercel.app";
 
 interface Profile {
   address: string;

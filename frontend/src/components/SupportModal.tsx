@@ -10,7 +10,8 @@ import { ethers } from "ethers";
 import ethereum from "../app/assests/ethereum-eth-logo.png";
 
 // Constants that would typically come from environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://chain-bento-backend.vercel.app";
 const CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
   "0xcfD2821D1A334E4177731a471fcF27183526f9C8";
