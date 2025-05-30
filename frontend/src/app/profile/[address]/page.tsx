@@ -15,6 +15,7 @@ import { isTouchDevice } from "@/utils/device";
 import { useDataContext } from "@/context/DataContext";
 import logo from "../../assests/ChainBentoLogo.png";
 import { SignInButton, useProfile } from "@farcaster/auth-kit";
+import { showNftMintToast } from "@/utils/toastNotifications";
 
 // API base URL from environment variable or default to localhost
 const API_BASE_URL =
@@ -682,8 +683,10 @@ export default function ProfilePage() {
               if (profileAddress) {
                 fetchProfileData(profileAddress);
               }
+              showNftMintToast(true);
             } catch (logErr) {
               console.error("Failed to log NFT mint after error:", logErr);
+              showNftMintToast(false);
             }
           }, 5000);
 

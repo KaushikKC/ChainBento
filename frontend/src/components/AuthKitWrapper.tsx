@@ -10,7 +10,7 @@ interface AuthKitWrapperProps {
 const config = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  domain: "example.com",
+  domain: "chainbento.com",
   siweUri: "https://example.com/login",
 };
 

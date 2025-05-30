@@ -4,6 +4,8 @@ import "./globals.css";
 import Providers from "@/provider/provider";
 import AuthKitWrapper from "@/components/AuthKitWrapper";
 import "@farcaster/auth-kit/styles.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +34,17 @@ export default function RootLayout({
       >
         <Providers>
           <AuthKitWrapper>{children}</AuthKitWrapper>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
         </Providers>
       </body>
     </html>

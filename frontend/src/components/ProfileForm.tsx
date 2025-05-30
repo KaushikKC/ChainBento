@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import axios, { AxiosProgressEvent } from "axios";
 import { SignInButton, useProfile } from "@farcaster/auth-kit";
+import { showProfileToast } from "@/utils/toastNotifications";
 
 // Define types
 interface Work {
@@ -285,8 +286,10 @@ export default function ProfileForm({
 
       // Submit the form data
       onSubmit(submissionData);
+      showProfileToast(true, !initialData);
     } catch (error) {
       console.error("Error during form submission:", error);
+      showProfileToast(false, !initialData);
       setErrors((prev) => ({
         ...prev,
         form: "An error occurred during submission. Please try again.",
